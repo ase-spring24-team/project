@@ -1,4 +1,11 @@
+"""
+File by Sathiya Narayanan Venkatesan
+This file contains the main functions of the project
+"""
+
+
 #importing the required packages
+import os
 import csv
 import random
 import numpy as np
@@ -7,15 +14,22 @@ from sklearn.linear_model import Lasso
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_percentage_error
 
-def create_lasso_data_set(data_file):
+def create_lasso_data_set(data_set):
+
+    data_file = f'../data/{data_set}/{data_set}.csv'
+
     #createing a dataframe
     df = pd.read_csv(data_file)
-    df_binary = df[['Spout_wait', 'Spliters', 'Counters', 'Throughput+', 'Latency-']]
-    df_binary.columns = ['Wait', 'Split', 'Count', 'Throughput', 'Latency']
+    print(df.columns.to_numpy())
+    count = 0
+    for column in df.columns.to_numpy():
+        if column.endswith('-') or column.endswith('+'):
+            break
+        count += 1
 
-    #splitting the dataframe into train and test
-    X = df_binary.iloc[:, :3]  
-    Y = df_binary.iloc[:, 3:]  
+    # #splitting the dataframe into train and test
+    X = df.iloc[:, :count]  
+    Y = df.iloc[:, count:]  
     x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=100)
 
     #Generating data
@@ -39,17 +53,30 @@ def create_lasso_data_set(data_file):
         alpha += 5
 
 
-    selected_data = random.sample(all_data, 10000)
+    wrtie_to_csv(data_set, "lasso",['Alpha', 'Max_iter', 'Tolerance', 'fit_intercept', 'positive', 'warm_start', 'selection', 'Error-'], all_data)
+
+
+def wrtie_to_csv(data_set, algorithm_name, column_names, data):
+
+    ## five by five
+    #randomly selecting 10000 rows from the generated data
+    selected_data = random.sample(data, 10000)
+    #dividing it into 5
     final_data = np.array_split(selected_data, 5)
 
-    # Writing to CSV
+    # Create the directory (handles non-existent parent directories)
+    directory = os.path.dirname(f'../data/{data_set}/{algorithm_name}/')
+    os.makedirs(directory, exist_ok=True)
+
     for i, data in enumerate(final_data):
-        file_path = '../data/lasso_hyperparameters_' + str(i + 1) + '.csv'
+        file_path = f'../data/{data_set}/{algorithm_name}/{algorithm_name}_hyperparameters_{i + 1}.csv'
         with open(file_path, mode='w', newline='') as file:
             writer = csv.writer(file)
-            writer.writerow(['Alpha', 'Max_iter', 'Tolerance', 'fit_intercept', 'positive', 'warm_start', 'selection', 'Error-'])
+            writer.writerow(column_names)
             for row in data:
                 writer.writerow(row)
 
-
-create_lasso_data_set('../data/SS-A.csv')
+datasets = ['SS-A', 'SS-N', 'Wine_quality', 'pom3a', 'pom3c', 'dtlz2', 'dtlz3', 'dtlz4', 'dtlz5', 'dtlz6']
+for dataset in datasets:
+    print(f'-------------------------------------------------------------------------------------------{dataset}-----------------------------------------------------------------------------------------')
+    create_lasso_data_set(dataset)

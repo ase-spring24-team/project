@@ -17,6 +17,44 @@ from sklearn.neighbors import KNeighborsRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_percentage_error, mean_absolute_error
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import ElasticNet
+
+def create_elasticnet_data_set(data_set):
+
+    x_train, x_test, y_train, y_test = create_dataframe(data_set)
+
+    #Generating data
+    all_data = []
+
+    for i in range(10000):
+        # loop through and create 10000 random hyper sets
+        alpha = random.randint(1, 100)*.1
+        l1_ratio = random.randint(0, 100)*.01
+        fit_intercept = random.sample([True, False], 1)[0]
+        max_iter = random.randint(500, 5000)
+        selection = random.sample(['cyclic', 'random'], 1)[0]
+        warm_start = random.sample([True, False], 1)[0]
+        tol = random.uniform(0.000000001, 0.000001)
+
+        elasticnet = ElasticNet(random_state=0,
+                                alpha=alpha,
+                                l1_ratio=l1_ratio,
+                                fit_intercept=fit_intercept,
+                                max_iter=max_iter,
+                                selection=selection,
+                                warm_start=warm_start,
+                                tol=tol)
+
+        elasticnet.fit(x_train, y_train)
+        y_pred = elasticnet.predict(x_test)
+        error = mean_absolute_error(y_test, y_pred)
+        print(f"ElasticNet Error : {error}")
+        all_data.append([alpha, l1_ratio, fit_intercept,
+                         max_iter, selection, warm_start, tol, error])
+
+    write_to_csv(data_set, "ElasticNet",
+                 ['Alpha', 'L1_ratio', 'fit_intercept', 'Max_iter', 'selection',
+                  'warm_start', 'Tol', 'Error-'], all_data, True)
 
 def create_random_forest_regression_data_set(data_set):
 
@@ -26,7 +64,6 @@ def create_random_forest_regression_data_set(data_set):
     all_data = []
 
     for i in range(10000):
-        start_time = time.time()
         # loop through and create 10000 random hyper sets
         n_estimators = random.randint(5, 800)
         max_depth = random.randint(0, 300)
@@ -185,4 +222,5 @@ for dataset in datasets:
     print(f'-------------------------------------------------------------------------------------------{dataset}-----------------------------------------------------------------------------------------')
     # create_lasso_data_set(dataset)
     #create_dt_regressor_data_set(dataset)
-    create_random_forest_regression_data_set(dataset)
+    #create_random_forest_regression_data_set(dataset)
+    create_elasticnet_data_set(dataset)

@@ -107,6 +107,27 @@ def create_dt_regressor_data_set(data_set):
 
     write_to_csv(data_set, "decision tree",['criterion', 'splitter', 'min_samples_split', 'min_samples_leaf', 'ccp_alpha', 'max_depth', 'Error-'], all_data)
 
+def create_knn_data_set(data_set):
+
+    x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=100)
+
+    #Generating data
+    all_data = []
+
+    for n_neighbors in range(1, 11):
+        for weights in ['uniform', 'distance']:
+            for algorithm in [ 'ball_tree', 'kd_tree', 'brute']:
+                for leaf_size in range(10, 101, 10):
+                    for p in np.arange(1, 5, 0.5):
+                        for metric in ['cityblock', 'euclidean', 'l1', 'l2', 'manhattan']:
+                            knn = KNeighborsRegressor(n_neighbors=n_neighbors, weights=weights, algorithm=algorithm, leaf_size=leaf_size, p=p, metric=metric)
+                            knn.fit(x_train, y_train)
+                            y_pred = knn.predict(x_test)
+                            error = mean_absolute_error(y_test, y_pred)
+                            print([n_neighbors, weights, algorithm, leaf_size, p, metric, error])
+                            all_data.append([n_neighbors, weights, algorithm, leaf_size, p, metric, error])
+
+    write_to_csv(data_set, "knn", ['N_neighbours', 'weights', 'algorithm', 'Leaf_size', 'P', 'metric', 'Error-'], all_data)
 
 
 def create_dataframe(data_set):

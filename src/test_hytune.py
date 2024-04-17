@@ -138,16 +138,19 @@ def create_dt_regressor_data_set(data_set):
                     while ccp_alpha <= 1:
                         max_depth = 1
                         while max_depth <= 10000:
-                            regressor = DecisionTreeRegressor(random_state=random_state, criterion=criterion, splitter=splitter,  min_samples_split = min_samples_split, min_samples_leaf=min_samples_leaf, ccp_alpha=ccp_alpha, max_depth=max_depth)
-                            regressor.fit(x_train, y_train)
-                            y_pred = regressor.predict(x_test)
-                            error = mean_absolute_percentage_error(y_test, y_pred)
-                            print(f"Error : {error}")
-                            all_data.append([criterion, splitter, min_samples_split, min_samples_leaf, ccp_alpha, max_depth, error])
+                            min_weight_fraction_leaf = 0.0
+                            while min_weight_fraction_leaf <= 1:
+                                regressor = DecisionTreeRegressor(random_state=random_state, criterion=criterion, splitter=splitter,  min_samples_split = min_samples_split, min_samples_leaf=min_samples_leaf, ccp_alpha=ccp_alpha, max_depth=max_depth)
+                                regressor.fit(x_train, y_train)
+                                y_pred = regressor.predict(x_test)
+                                error = mean_absolute_percentage_error(y_test, y_pred)
+                                print(f"Error : {error}")
+                                all_data.append([criterion, splitter, min_samples_split, min_samples_leaf, ccp_alpha, max_depth, min_weight_fraction_leaf, error])
+                                min_weight_fraction_leaf += 0.1
                             max_depth *= 10
                         ccp_alpha += 0.1
 
-    l.write_to_csv(data_set, "decision tree",['criterion', 'splitter', 'min_samples_split', 'min_samples_leaf', 'ccp_alpha', 'max_depth', 'Error-'], all_data)
+    l.write_to_csv(data_set, "decision tree",['criterion', 'splitter', 'Min_samples_split', 'Min_samples_leaf', 'Ccp_alpha', 'Max_depth', 'Min_weight_fraction_leaf', 'Error-'], all_data)
 
 def create_knn_data_set(data_set):
 
@@ -300,11 +303,11 @@ if __name__ == '__main__':
     the._set(SLOTS({"file":"../data/dtlz2/random_forest/random_forest_hyperparameters_1.csv", "__help": "", "m":2, "k":1, "p":2, "Half":256, "d":32, "D":4,
                     "Far":.95, "seed":31210, "Beam":10, "bins":16, "Cut":.1, "Support":2}))
     random.seed(the.seed)
-    datasets = ['SS-A']
-    # datasets = [ 'Wine_quality', 'pom3a', 'pom3c', 'dtlz2', 'dtlz3', 'dtlz4', 'dtlz5', 'dtlz6', 'SS-A', 'SS-K']
+    datasets = ['Wine_quality']
+    # datasets = [ 'SS-A', 'pom3a', 'pom3c', 'dtlz2', 'dtlz3', 'dtlz4', 'dtlz5', 'dtlz6', 'SS-A', 'SS-K']
     for dataset in datasets:
         print(f'-------------------------------------------------------------------------------------------{dataset}-----------------------------------------------------------------------------------------')
-        # create_lasso_data_set(dataset)
+        create_lasso_data_set(dataset)
         create_dt_regressor_data_set(dataset)
         #create_random_forest_regression_data_set(dataset)
         #create_elasticnet_data_set(dataset)

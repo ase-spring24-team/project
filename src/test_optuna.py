@@ -20,6 +20,7 @@ def optuna_for_decision_tree():
                                 'min_samples_leaf' : int(lines[3]),
                                 'ccp_alpha' : float(lines[4]),
                                 'max_depth' : int(lines[5]),
+                                'min_weight_fraction_leaf' : float(lines[6]),
                             },
                             distributions={
                                 'criterion' : optuna.distributions.CategoricalDistribution(['squared_error', 'friedman_mse', 'absolute_error', 'poisson']),
@@ -28,8 +29,9 @@ def optuna_for_decision_tree():
                                 'min_samples_leaf' : optuna.distributions.IntDistribution(1, 100),
                                 'ccp_alpha' : optuna.distributions.FloatDistribution(0, 1),
                                 'max_depth' : optuna.distributions.IntDistribution(1, 10000),
+                                'min_weight_fraction_leaf' : optuna.distributions.FloatDistribution(0, 1),
                             },
-                            value=float(lines[6]),
+                            value=float(lines[7]),
                         )
                     )
             print(study.best_params)

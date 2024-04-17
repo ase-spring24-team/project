@@ -216,8 +216,7 @@ def write_to_csv(data_set, algorithm_name, column_names, data, already_random=Fa
                 writer.writerow(row)
 
 # datasets = ['SS-A']
-datasets = [ 'Wine_quality', 'pom3a', 'pom3c', 'dtlz2', 'dtlz3', 'dtlz4', 'dtlz5', 'dtlz6']
-datasets = ['Wine_quality']
+datasets = [ 'Wine_quality', 'pom3a', 'pom3c', 'dtlz2', 'dtlz3', 'dtlz4', 'dtlz5', 'dtlz6', 'SS-A', 'SS-K']
 for dataset in datasets:
     print(f'-------------------------------------------------------------------------------------------{dataset}-----------------------------------------------------------------------------------------')
     # create_lasso_data_set(dataset)

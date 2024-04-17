@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 from sklearn.linear_model import Lasso
 from sklearn.tree import DecisionTreeRegressor
+from sklearn.neighbors import KNeighborsRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_percentage_error, mean_absolute_error
 from sklearn.ensemble import RandomForestRegressor
@@ -109,7 +110,7 @@ def create_dt_regressor_data_set(data_set):
 
 def create_knn_data_set(data_set):
 
-    x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=100)
+    x_train, x_test, y_train, y_test = create_dataframe(data_set)
 
     #Generating data
     all_data = []

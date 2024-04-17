@@ -23,7 +23,7 @@ for dataset in datasets:
         error = mean_absolute_error(y_test, y_pred)
         data.append([criterion, splitter, min_samples_split, min_samples_leaf, ccp_alpha, max_depth, error])
         return error
-    study = optuna.create_study()
+    study = optuna.create_study(direction="minimize")
     study.optimize(objective, n_trials=10)
     print(study.best_params)
     utils.wrtie_to_csv(dataset, "optuna",['criterion', 'splitter', 'min_samples_split', 'min_samples_leaf', 'ccp_alpha', 'max_depth', 'Error-'], data)

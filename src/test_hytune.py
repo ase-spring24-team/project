@@ -108,7 +108,7 @@ def create_lasso_data_set(data_set):
         for positive in [True, False]:
             for fit_intercept in [True, False]:
                 for warm_start in [True, False]:
-                    for max_iter in range(300, 5000, 500):
+                    for max_iter in range(100, 10000, 500):
                         for selection in ['cyclic', 'random']:
                             tol = .00000001
                             while tol <= .1:
@@ -304,8 +304,8 @@ if __name__ == '__main__':
     # datasets = [ 'Wine_quality', 'pom3a', 'pom3c', 'dtlz2', 'dtlz3', 'dtlz4', 'dtlz5', 'dtlz6', 'SS-A', 'SS-K']
     for dataset in datasets:
         print(f'-------------------------------------------------------------------------------------------{dataset}-----------------------------------------------------------------------------------------')
-        create_lasso_data_set(dataset)
-        # create_dt_regressor_data_set(dataset)
+        # create_lasso_data_set(dataset)
+        create_dt_regressor_data_set(dataset)
         #create_random_forest_regression_data_set(dataset)
         #create_elasticnet_data_set(dataset)
         # ranking_stats()  # runs on the.file currently

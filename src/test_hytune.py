@@ -5,7 +5,9 @@ This file contains the main functions of the project
 
 
 #importing the required packages
-import utils
+import os
+import csv
+import time
 import random
 import numpy as np
 import pandas as pd
@@ -30,12 +32,12 @@ from statistics import mean, stdev
 
 def create_elasticnet_data_set(data_set):
 
-    x_train, x_test, y_train, y_test = utils.create_dataframe(data_set)
+    x_train, x_test, y_train, y_test = create_dataframe(data_set)
 
     #Generating data
     all_data = []
 
-    for _ in range(10000):
+    for i in range(10000):
         # loop through and create 10000 random hyper sets
         alpha = random.randint(1, 100)*.1
         l1_ratio = random.randint(0, 100)*.01
@@ -61,18 +63,18 @@ def create_elasticnet_data_set(data_set):
         all_data.append([alpha, l1_ratio, fit_intercept,
                          max_iter, selection, warm_start, tol, error])
 
-    utils.write_to_csv(data_set, "ElasticNet",
+    write_to_csv(data_set, "ElasticNet",
                  ['Alpha', 'L1_ratio', 'fit_intercept', 'Max_iter', 'selection',
                   'warm_start', 'Tol', 'Error-'], all_data, True)
 
 def create_random_forest_regression_data_set(data_set):
 
-    x_train, x_test, y_train, y_test = utils.create_dataframe(data_set)
+    x_train, x_test, y_train, y_test = create_dataframe(data_set)
 
     #Generating data
     all_data = []
 
-    for _ in range(10000):
+    for i in range(10000):
         # loop through and create 10000 random hyper sets
         n_estimators = random.randint(5, 800)
         max_depth = random.randint(0, 300)
@@ -98,13 +100,13 @@ def create_random_forest_regression_data_set(data_set):
                          min_samples_leaf, min_samples_split, bootstrap, error])
 
 
-    utils.write_to_csv(data_set, "random_forest",
+    write_to_csv(data_set, "random_forest",
                  ['n_estimators', 'max_features', 'max_depth', 'min_samples_leaf',
                   'min_samples_split', 'bootstrap', 'Error-'], all_data, True)
 
 def create_lasso_data_set(data_set):
  
-    x_train, x_test, y_train, y_test = utils.create_dataframe(data_set)
+    x_train, x_test, y_train, y_test = create_dataframe(data_set)
 
     #Generating hyperparameter data
     all_data = []
@@ -127,10 +129,10 @@ def create_lasso_data_set(data_set):
         alpha += 5
 
 
-    utils.write_to_csv(data_set, "lasso",['Alpha', 'Max_iter', 'Tolerance', 'fit_intercept', 'positive', 'warm_start', 'selection', 'Error-'], all_data)
+    write_to_csv(data_set, "lasso",['Alpha', 'Max_iter', 'Tolerance', 'fit_intercept', 'positive', 'warm_start', 'selection', 'Error-'], all_data)
 
 def create_dt_regressor_data_set(data_set):
-    x_train, x_test, y_train, y_test = utils.create_dataframe(data_set)
+    x_train, x_test, y_train, y_test = create_dataframe(data_set)
 
     #Generating hyperparameter data
     all_data = []
@@ -148,15 +150,15 @@ def create_dt_regressor_data_set(data_set):
                             y_pred = regressor.predict(x_test)
                             error = mean_absolute_percentage_error(y_test, y_pred)
                             print(f"Error : {error}")
-                            all_data.append([criterion, splitter, min_samples_split, min_samples_leaf, ccp_alpha, max_depth, error])
+                            all_data.append([criterion, splitter, max_depth, error])
                             max_depth *= 10
                         ccp_alpha += 0.1
 
-    utils.write_to_csv(data_set, "decision tree",['criterion', 'splitter', 'min_samples_split', 'min_samples_leaf', 'ccp_alpha', 'max_depth', 'Error-'], all_data)
+    write_to_csv(data_set, "decision tree",['criterion', 'splitter', 'min_samples_split', 'min_samples_leaf', 'ccp_alpha', 'max_depth', 'Error-'], all_data)
 
 def create_knn_data_set(data_set):
 
-    x_train, x_test, y_train, y_test = utils.create_dataframe(data_set)
+    x_train, x_test, y_train, y_test = create_dataframe(data_set)
 
     #Generating data
     all_data = []
@@ -174,7 +176,55 @@ def create_knn_data_set(data_set):
                             print([n_neighbors, weights, algorithm, leaf_size, p, metric, error])
                             all_data.append([n_neighbors, weights, algorithm, leaf_size, p, metric, error])
 
-    utils.write_to_csv(data_set, "knn", ['N_neighbours', 'weights', 'algorithm', 'Leaf_size', 'P', 'metric', 'Error-'], all_data)
+    write_to_csv(data_set, "knn", ['N_neighbours', 'weights', 'algorithm', 'Leaf_size', 'P', 'metric', 'Error-'], all_data)
+
+
+def create_dataframe(data_set):
+    data_file = f'../data/{data_set}/{data_set}.csv'
+
+    #createing a dataframe
+    df = pd.read_csv(data_file)
+    print(df.columns.to_numpy())
+
+    # get the x and y column indexes
+    xs, ys =  [], []
+    for i, column in enumerate( df.columns.to_numpy()):
+        if column.endswith('-') or column.endswith('+'):
+            ys.append(i)
+        else:
+            xs.append(i)
+
+    # #splitting the dataframe into train and test    
+    X = df.iloc[:,xs]  
+    Y = df.iloc[:,ys]  
+    return train_test_split(X, Y, test_size=0.2, random_state=100)
+
+def write_to_csv(data_set, algorithm_name, column_names, data, already_random=False):
+
+    ## five by five
+    #shuffle data 5 times first
+    for i in range(5):
+        random.shuffle(data)
+
+    if not already_random:
+        #randomly selecting 10000 rows from the generated data
+        selected_data = random.sample(data, min(10000, len(data)))
+    else:
+        selected_data = data
+    #dividing it into 5
+    final_data = np.array_split(selected_data, 5)
+
+    # Create the directory (handles non-existent parent directories)
+    directory = os.path.dirname(f'../data/{data_set}/{algorithm_name}/')
+    os.makedirs(directory, exist_ok=True)
+
+    for i, data in enumerate(final_data):
+        file_path = f'../data/{data_set}/{algorithm_name}/{algorithm_name}_hyperparameters_{i + 1}.csv'
+        with open(file_path, mode='w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(column_names)
+            for row in data:
+                writer.writerow(row)
 
 def print_ranking_analysis(d):
     """

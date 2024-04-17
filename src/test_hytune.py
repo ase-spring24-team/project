@@ -5,7 +5,7 @@ This file contains the main functions of the project
 
 
 #importing the required packages
-import random
+
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import Lasso
@@ -143,7 +143,7 @@ def create_dt_regressor_data_set(data_set):
                             y_pred = regressor.predict(x_test)
                             error = mean_absolute_percentage_error(y_test, y_pred)
                             print(f"Error : {error}")
-                            all_data.append([criterion, splitter, max_depth, error])
+                            all_data.append([criterion, splitter, min_samples_split, min_samples_leaf, ccp_alpha, max_depth, error])
                             max_depth *= 10
                         ccp_alpha += 0.1
 
@@ -300,12 +300,12 @@ if __name__ == '__main__':
     the._set(SLOTS({"file":"../data/dtlz2/random_forest/random_forest_hyperparameters_1.csv", "__help": "", "m":2, "k":1, "p":2, "Half":256, "d":32, "D":4,
                     "Far":.95, "seed":31210, "Beam":10, "bins":16, "Cut":.1, "Support":2}))
     random.seed(the.seed)
-    # datasets = ['SS-A']
-    datasets = [ 'Wine_quality', 'pom3a', 'pom3c', 'dtlz2', 'dtlz3', 'dtlz4', 'dtlz5', 'dtlz6', 'SS-A', 'SS-K']
+    datasets = ['SS-A']
+    # datasets = [ 'Wine_quality', 'pom3a', 'pom3c', 'dtlz2', 'dtlz3', 'dtlz4', 'dtlz5', 'dtlz6', 'SS-A', 'SS-K']
     for dataset in datasets:
         print(f'-------------------------------------------------------------------------------------------{dataset}-----------------------------------------------------------------------------------------')
-        # create_lasso_data_set(dataset)
-        #create_dt_regressor_data_set(dataset)
+        create_lasso_data_set(dataset)
+        # create_dt_regressor_data_set(dataset)
         #create_random_forest_regression_data_set(dataset)
         #create_elasticnet_data_set(dataset)
-    ranking_stats()  # runs on the.file currently
+        # ranking_stats()  # runs on the.file currently

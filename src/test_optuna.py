@@ -1,11 +1,11 @@
 import csv
 import optuna
-import utils
+import util
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.metrics import mean_absolute_error
 
 def objective(trial):
-    x_train, x_test, y_train, y_test = utils.create_dataframe('SS-A')
+    x_train, x_test, y_train, y_test = util.create_dataframe('SS-A')
     random_state = 3200
     criterion = trial.suggest_categorical( 'criterion', ['squared_error', 'friedman_mse', 'absolute_error', 'poisson'])
     splitter = trial.suggest_categorical('splitter', ['best', 'random'])

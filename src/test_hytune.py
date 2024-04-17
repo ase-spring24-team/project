@@ -136,15 +136,18 @@ def create_dataframe(data_set):
     #createing a dataframe
     df = pd.read_csv(data_file)
     print(df.columns.to_numpy())
-    count = 0
-    for column in df.columns.to_numpy():
-        if column.endswith('-') or column.endswith('+'):
-            break
-        count += 1
 
-    #splitting the dataframe into train and test
-    X = df.iloc[:, :count]  
-    Y = df.iloc[:, count:]  
+    # get the x and y column indexes
+    xs, ys =  [], []
+    for i, column in enumerate( df.columns.to_numpy()):
+        if column.endswith('-') or column.endswith('+'):
+            ys.append(i)
+        else:
+            xs.append(i)
+
+    # #splitting the dataframe into train and test    
+    X = df.iloc[:,xs]  
+    Y = df.iloc[:,ys]  
     return train_test_split(X, Y, test_size=0.2, random_state=100)
 
 def write_to_csv(data_set, algorithm_name, column_names, data, already_random=False):

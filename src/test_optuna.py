@@ -1,10 +1,10 @@
 import csv
 import optuna
 
-def optuna_for_decision_tree():
+def optuna_for_decision_tree(dataset):
     for i in range(1, 6):
         study = optuna.create_study()
-        with open(f'../data/SS-A/decision tree/decision tree_hyperparameters_{i}.csv', mode ='r')as file:
+        with open(f'../data/{dataset}/decision tree/decision tree_hyperparameters_{i}.csv', mode ='r')as file:
             csv_file = csv.reader(file)
             first_line = True
             for lines in csv_file:
@@ -34,13 +34,13 @@ def optuna_for_decision_tree():
                             value=float(lines[7]),
                         )
                     )
-            print(study.best_params)
+            print(study.best_params, study.best_trial.value)
 
 
-def optuna_for_lasso():
+def optuna_for_lasso(dataset):
     for i in range(1, 6):
         study = optuna.create_study()
-        with open(f'../data/SS-A/lasso/lasso_hyperparameters_{i}.csv', mode ='r')as file:
+        with open(f'../data/{dataset}/lasso/lasso_hyperparameters_{i}.csv', mode ='r')as file:
             csv_file = csv.reader(file)
             first_line = True
             for lines in csv_file:
@@ -70,7 +70,7 @@ def optuna_for_lasso():
                             value=float(lines[7]),
                         )
                     )
-            print(study.best_params)    
+            print(study.best_params, study.best_trial.value)    
 
-# optuna_for_decision_tree()
-optuna_for_lasso()
+optuna_for_decision_tree('Wine_quality')
+# optuna_for_lasso()

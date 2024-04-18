@@ -11,8 +11,7 @@ import pandas as pd
 from sklearn.linear_model import Lasso
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.neighbors import KNeighborsRegressor
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_absolute_percentage_error, mean_absolute_error
+from sklearn.metrics import mean_absolute_error
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import ElasticNet
 from Data import Data
@@ -115,7 +114,7 @@ def create_lasso_data_set(data_set):
                                 lasso = Lasso(alpha=alpha, max_iter=max_iter, tol=tol, fit_intercept=fit_intercept, positive = positive, warm_start=warm_start, selection = selection)
                                 lasso.fit(x_train, y_train)
                                 y_pred = lasso.predict(x_test)
-                                error = mean_absolute_percentage_error(y_test, y_pred)
+                                error = mean_absolute_error(y_test, y_pred)
                                 print(f"Error : {error}")
                                 all_data.append([alpha, max_iter, tol, fit_intercept, positive, warm_start, selection, error])
                                 tol *= 10
@@ -143,7 +142,7 @@ def create_dt_regressor_data_set(data_set):
                                 regressor = DecisionTreeRegressor(random_state=random_state, criterion=criterion, splitter=splitter,  min_samples_split = min_samples_split, min_samples_leaf=min_samples_leaf, ccp_alpha=ccp_alpha, max_depth=max_depth)
                                 regressor.fit(x_train, y_train)
                                 y_pred = regressor.predict(x_test)
-                                error = mean_absolute_percentage_error(y_test, y_pred)
+                                error = mean_absolute_error(y_test, y_pred)
                                 print(f"Error : {error}")
                                 all_data.append([criterion, splitter, min_samples_split, min_samples_leaf, ccp_alpha, max_depth, min_weight_fraction_leaf, error])
                                 min_weight_fraction_leaf += 0.1
@@ -303,13 +302,12 @@ if __name__ == '__main__':
     the._set(SLOTS({"file":"../data/dtlz2/random_forest/random_forest_hyperparameters_1.csv", "__help": "", "m":2, "k":1, "p":2, "Half":256, "d":32, "D":4,
                     "Far":.95, "seed":31210, "Beam":10, "bins":16, "Cut":.1, "Support":2}))
     random.seed(the.seed)
-    # datasets = ['SS-A']
-    datasets = [ 'Wine_quality', 'pom3a', 'pom3c', 'dtlz2', 'dtlz3', 'dtlz4', 'dtlz5', 'dtlz6', 'SS-A', 'SS-K']
-    datasets = [ 'dtlz3', 'dtlz4', 'dtlz5', 'dtlz6', 'SS-A', 'SS-K']
+    # datasets = []
+    datasets = [ 'SS-A', 'Wine_quality', 'pom3a', 'pom3c', 'dtlz2', 'dtlz3', 'dtlz4', 'dtlz5', 'dtlz6', 'SS-K']
     for dataset in datasets:
         print(f'-------------------------------------------------------------------------------------------{dataset}-----------------------------------------------------------------------------------------')
-        # create_lasso_data_set(dataset)
-        #create_dt_regressor_data_set(dataset)
-        create_random_forest_regression_data_set(dataset)
+        create_lasso_data_set(dataset)
+        # create_dt_regressor_data_set(dataset)
+        #create_random_forest_regression_data_set(dataset)
         #create_elasticnet_data_set(dataset)
-    #ranking_stats()  # runs on the.file currently
+        #ranking_stats()  # runs on the.file currently

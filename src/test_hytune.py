@@ -94,8 +94,8 @@ def create_random_forest_regression_data_set(data_set):
 
 
     l.write_to_csv(data_set, "random_forest",
-                 ['n_estimators', 'max_features', 'max_depth', 'min_samples_leaf',
-                  'min_samples_split', 'bootstrap', 'Error-'], all_data, True)
+                 ['N_estimators', 'max_features', 'Max_depth', 'Min_samples_leaf',
+                  'Min_samples_split', 'bootstrap', 'Error-'], all_data, True)
 
 def create_lasso_data_set(data_set):
  
@@ -302,10 +302,11 @@ if __name__ == '__main__':
     random.seed(the.seed)
     # datasets = ['SS-A']
     datasets = [ 'Wine_quality', 'pom3a', 'pom3c', 'dtlz2', 'dtlz3', 'dtlz4', 'dtlz5', 'dtlz6', 'SS-A', 'SS-K']
+    datasets = [ 'dtlz3', 'dtlz4', 'dtlz5', 'dtlz6', 'SS-A', 'SS-K']
     for dataset in datasets:
         print(f'-------------------------------------------------------------------------------------------{dataset}-----------------------------------------------------------------------------------------')
         # create_lasso_data_set(dataset)
         #create_dt_regressor_data_set(dataset)
-        #create_random_forest_regression_data_set(dataset)
+        create_random_forest_regression_data_set(dataset)
         #create_elasticnet_data_set(dataset)
-    ranking_stats()  # runs on the.file currently
+    #ranking_stats()  # runs on the.file currently

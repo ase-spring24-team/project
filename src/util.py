@@ -6,7 +6,7 @@ lines 6-18 are from professor Menzies
 import re
 import os
 import ast
-import csv
+import csv as csv_lib
 import sys
 import random
 import math
@@ -152,7 +152,7 @@ def write_to_csv(data_set, algorithm_name, column_names, data, pre_shuffled=Fals
     for i, data in enumerate(final_data):
         file_path = f'../data/{data_set}/{algorithm_name}/{algorithm_name}_hyperparameters_{i + 1}.csv'
         with open(file_path, mode='w', newline='') as file:
-            writer = csv.writer(file)
+            writer = csv_lib.writer(file)
             writer.writerow(column_names)
             for row in data:
                 writer.writerow(row)

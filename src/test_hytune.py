@@ -108,7 +108,7 @@ def create_lasso_data_set(data_set):
         for positive in [True, False]:
             for fit_intercept in [True, False]:
                 for warm_start in [True, False]:
-                    for max_iter in range(300, 5000, 500):
+                    for max_iter in range(100, 10000, 500):
                         for selection in ['cyclic', 'random']:
                             tol = .00000001
                             while tol <= .1:
@@ -138,12 +138,15 @@ def create_dt_regressor_data_set(data_set):
                     while ccp_alpha <= 1:
                         max_depth = 1
                         while max_depth <= 10000:
-                            regressor = DecisionTreeRegressor(random_state=random_state, criterion=criterion, splitter=splitter,  min_samples_split = min_samples_split, min_samples_leaf=min_samples_leaf, ccp_alpha=ccp_alpha, max_depth=max_depth)
-                            regressor.fit(x_train, y_train)
-                            y_pred = regressor.predict(x_test)
-                            error = mean_absolute_percentage_error(y_test, y_pred)
-                            print(f"Error : {error}")
-                            all_data.append([criterion, splitter, max_depth, error])
+                            min_weight_fraction_leaf = 0.0
+                            while min_weight_fraction_leaf <= 1:
+                                regressor = DecisionTreeRegressor(random_state=random_state, criterion=criterion, splitter=splitter,  min_samples_split = min_samples_split, min_samples_leaf=min_samples_leaf, ccp_alpha=ccp_alpha, max_depth=max_depth)
+                                regressor.fit(x_train, y_train)
+                                y_pred = regressor.predict(x_test)
+                                error = mean_absolute_percentage_error(y_test, y_pred)
+                                print(f"Error : {error}")
+                                all_data.append([criterion, splitter, min_samples_split, min_samples_leaf, ccp_alpha, max_depth, min_weight_fraction_leaf, error])
+                                min_weight_fraction_leaf += 0.1
                             max_depth *= 10
                         ccp_alpha += 0.1
 

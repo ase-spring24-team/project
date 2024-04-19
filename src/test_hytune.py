@@ -6,7 +6,10 @@ This file contains the main functions of the project
 
 #importing the required packages
 import random
+import time
+import os
 import numpy as np
+import csv as csv_lib
 import pandas as pd
 from sklearn.linear_model import Lasso
 from sklearn.tree import DecisionTreeRegressor
@@ -244,40 +247,145 @@ def get_base_line_list(rows,d):
         d2h_list.append(row.d2h(d))
     return d2h_list
 
-def ranking_stats():
+def ranking_stats(file_name):
     """
     Runs smo, rrp, optuna, and hyperband and compares them all to each other
     """
-    d = Data(the.file)  # just set d for easy use in print statements
+    d = Data(file_name)  # just set d for easy use in print statements
     print_ranking_analysis(d)
     all_rows = d.rows
     # Now we must sort all rows based on the distance to heaven to get our ceiling
     all_rows.sort(key=lambda x: x.d2h(d))
     ceiling = l.rnd(all_rows[0].d2h(d))  # set ceiling value to best value
     bonr9_best_list = []  # the list of 20 best bonr9 value
+    bonr9_clock_time_list = []  # the list of 20 best bonr9 value
     rand9_best_list = []  # the list of 20 best rand9 value
+    rand9_clock_time_list = []
     bonr15_best_list = []
+    bonr15_clock_time_list = []
     rand15_best_list = []
+    rand15_clock_time_list = []
     bonr20_best_list = []
+    bonr20_clock_time_list = []
     rand20_best_list = []
+    rand20_clock_time_list = []
     rrp_best_list = []
+    rrp_clock_time_list = []
     rrp_doubletap_best_list = []
+    rrp_doubletap_clock_time_list = []
     rand358_best_list = []
+    rand358_clock_time_list = []
+    stats = []  # list of lists...
     print("Calculating Best and Tiny...")
     for i in range(20):
         # iterate our 20 times
+        start_time = time.time()
         bonr9_best_list.append(get_best_bonr(9))  # calls to a function that runs data for bonr9
+        end_time = time.time()
+        bonr9_clock_time_list.append(end_time-start_time)
         # and returns the best value once
+
+        start_time = time.time()
         rand9_best_list.append(get_best_rand(9))  # calls to function which randomly samples
         # 9 rows from the data set and returns the best rows d2h
+        end_time = time.time()
+        rand9_clock_time_list.append(end_time-start_time)
+
+        start_time = time.time()
         bonr15_best_list.append(get_best_bonr(15))
+        end_time = time.time()
+        bonr15_clock_time_list.append(end_time-start_time)
+
+        start_time = time.time()
         rand15_best_list.append(get_best_rand(15))
+        end_time = time.time()
+        rand15_clock_time_list.append(end_time-start_time)
+
+        start_time = time.time()
         bonr20_best_list.append(get_best_bonr(20))
+        end_time = time.time()
+        bonr20_clock_time_list.append(end_time-start_time)
+
+        start_time = time.time()
         rand20_best_list.append(get_best_rand(20))
+        end_time = time.time()
+        rand20_clock_time_list.append(end_time-start_time)
+
+        start_time = time.time()
         rrp_best_list.append(get_best_rrp())
+        end_time = time.time()
+        rrp_clock_time_list.append(end_time-start_time)
+
+        start_time = time.time()
         rrp_doubletap_best_list.append(get_best_rrpDT())
+        end_time = time.time()
+        rrp_doubletap_clock_time_list.append(end_time-start_time)
+
+        start_time = time.time()
         rand358_best_list.append(get_best_rand(358))
+        end_time = time.time()
+        rand358_clock_time_list.append(end_time-start_time)
+
     base_line_list = get_base_line_list(d.rows, d)  # returns a list of all rows d2h values
+
+    # Write all the lists to a csv. Format ->
+    # Optimization Algo Name
+    # D2H's
+    # Clock Times
+    # Total time
+    # repeat
+    # Create the directory (handles non-existent parent directories)
+    directory = os.path.dirname(f'../data/{file_name}/optimization_stats/')
+    os.makedirs(directory, exist_ok=True)
+
+    file_path = f'../data/{file_name}/optimization_stats/stats.csv'
+    with open(file_path, mode='w', newline='') as file:
+        writer = csv_lib.writer(file)
+        writer.writerow(['SMO9'])
+        writer.writerow(bonr9_best_list)
+        writer.writerow(bonr9_clock_time_list)
+        writer.writerow([sum(bonr9_clock_time_list)])
+
+        writer.writerow(['SMO15'])
+        writer.writerow(bonr15_best_list)
+        writer.writerow(bonr15_clock_time_list)
+        writer.writerow([sum(bonr15_clock_time_list)])
+
+        writer.writerow(['SMO20'])
+        writer.writerow(bonr20_best_list)
+        writer.writerow(bonr20_clock_time_list)
+        writer.writerow([sum(bonr20_clock_time_list)])
+
+        writer.writerow(['RRP'])
+        writer.writerow(rrp_best_list)
+        writer.writerow(rrp_clock_time_list)
+        writer.writerow([sum(rrp_clock_time_list)])
+
+        writer.writerow(['RRPDT'])
+        writer.writerow(rrp_doubletap_best_list)
+        writer.writerow(rrp_doubletap_clock_time_list)
+        writer.writerow([sum(rrp_doubletap_clock_time_list)])
+
+        writer.writerow(['Random9'])
+        writer.writerow(rand9_best_list)
+        writer.writerow(rand9_clock_time_list)
+        writer.writerow([sum(rand9_clock_time_list)])
+
+        writer.writerow(['Random15'])
+        writer.writerow(rand15_best_list)
+        writer.writerow(rand15_clock_time_list)
+        writer.writerow([sum(rand15_clock_time_list)])
+
+        writer.writerow(['Random20'])
+        writer.writerow(rand20_best_list)
+        writer.writerow(rand20_clock_time_list)
+        writer.writerow([sum(rand20_clock_time_list)])
+
+        writer.writerow(['Random358'])
+        writer.writerow(rand358_best_list)
+        writer.writerow(rand358_clock_time_list)
+        writer.writerow([sum(rand358_clock_time_list)])
+
     std = stdev(base_line_list)  # standard deviation of all rows d2h values
     print(f"Best : {ceiling}")  #
     print(f"Tiny : {l.rnd(.35*std)}")  # WE NEED to change this later...
@@ -306,8 +414,8 @@ if __name__ == '__main__':
     datasets = [ 'SS-A', 'Wine_quality', 'pom3a', 'pom3c', 'dtlz2', 'dtlz3', 'dtlz4', 'dtlz5', 'dtlz6', 'SS-K']
     for dataset in datasets:
         print(f'-------------------------------------------------------------------------------------------{dataset}-----------------------------------------------------------------------------------------')
-        create_lasso_data_set(dataset)
+        #create_lasso_data_set(dataset)
         # create_dt_regressor_data_set(dataset)
         #create_random_forest_regression_data_set(dataset)
         #create_elasticnet_data_set(dataset)
-        #ranking_stats()  # runs on the.file currently
+        ranking_stats(dataset)  # runs on 'dataset'

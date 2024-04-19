@@ -247,11 +247,11 @@ def get_base_line_list(rows,d):
         d2h_list.append(row.d2h(d))
     return d2h_list
 
-def ranking_stats(file_name):
+def ranking_stats(file_name, algo_name):
     """
     Runs smo, rrp, optuna, and hyperband and compares them all to each other
     """
-    d = Data(file_name)  # just set d for easy use in print statements
+    d = Data(f'../data/{file_name}/{algo_name}/{algo_name}_hyperparameters_1.csv')  # just set d for easy use in print statements
     print_ranking_analysis(d)
     all_rows = d.rows
     # Now we must sort all rows based on the distance to heaven to get our ceiling
@@ -335,10 +335,10 @@ def ranking_stats(file_name):
     # Total time
     # repeat
     # Create the directory (handles non-existent parent directories)
-    directory = os.path.dirname(f'../data/{file_name}/optimization_stats/')
+    directory = os.path.dirname(f'../data/{file_name}/{algo_name}/optimization_stats/')
     os.makedirs(directory, exist_ok=True)
 
-    file_path = f'../data/{file_name}/optimization_stats/stats.csv'
+    file_path = f'../data/{file_name}/{algo_name}/optimization_stats/stats.csv'
     with open(file_path, mode='w', newline='') as file:
         writer = csv_lib.writer(file)
         writer.writerow(['SMO9'])
@@ -412,10 +412,16 @@ if __name__ == '__main__':
     random.seed(the.seed)
     # datasets = []
     datasets = [ 'SS-A', 'Wine_quality', 'pom3a', 'pom3c', 'dtlz2', 'dtlz3', 'dtlz4', 'dtlz5', 'dtlz6', 'SS-K']
-    for dataset in datasets:
-        print(f'-------------------------------------------------------------------------------------------{dataset}-----------------------------------------------------------------------------------------')
+    optimization_algos = ['random_forest', 'lasso', 'knn', 'ElasticNet', 'decision tree']
+    #for dataset in datasets:
+        #print(f'-------------------------------------------------------------------------------------------{dataset}-----------------------------------------------------------------------------------------')
         #create_lasso_data_set(dataset)
         # create_dt_regressor_data_set(dataset)
         #create_random_forest_regression_data_set(dataset)
         #create_elasticnet_data_set(dataset)
-        ranking_stats(dataset)  # runs on 'dataset'
+        #ranking_stats(dataset)  # runs on 'dataset'
+
+    # time to optimize and run stats
+    for dataset in datasets:
+        for algo_name in optimization_algos:
+            ranking_stats(dataset, algo_name)

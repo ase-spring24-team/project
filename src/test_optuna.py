@@ -98,10 +98,60 @@ def optuna_for_lasso(dataset):
             total_time = end_time - start_time
             best_params = study.best_params
             output.append([size, best_params.get('Alpha'), best_params.get('Max_iter'), best_params.get('Tolerance'), best_params.get('fit_intercept'), best_params.get('positive'), best_params.get('warm_start'), best_params.get('selection'), total_time, study.best_trial.value])
-            print(output)
+        print(output)
+
+
+def optuna_for_elasticnet(dataset):
+    with open(f'../data/{dataset}/ElasticNet/merged_hyperparameters.csv', mode ='r')as file:
+        csv_file = csv.reader(file)
+        all_data = []
+        first_line = True
+        for row in csv_file:
+            if first_line:
+                first_line = False
+                continue
+            all_data.append(row)
+        output = []
+        for size in [9, 15, 50, 10000]:
+            random.shuffle(all_data)
+            study = optuna.create_study()
+            for i in range(1, size):
+                start_time = time.time()
+                lines = all_data[i]
+                study.add_trial(
+                    optuna.trial.create_trial(
+                        params={
+                            'Alpha' : float(lines[0]),
+                            'L1_ratio' : float(lines[1]),
+                            'fit_intercept' : lines[2] == 'True',
+                            'Max_iter' : int(lines[3]),
+                            'selection' : lines[4],
+                            'warm_start' : lines[5] == 'True',
+                            'Tol' : float(lines[6]),
+                        },
+                        distributions={
+                            'Alpha' : optuna.distributions.FloatDistribution(0, 100),
+                            'L1_ratio' : optuna.distributions.FloatDistribution(0, 100),
+                            'fit_intercept' : optuna.distributions.CategoricalDistribution([True, False]),
+                            'Max_iter' : optuna.distributions.IntDistribution(500, 5000),
+                            'selection' : optuna.distributions.CategoricalDistribution(['cyclic', 'random']),
+                            'warm_start' : optuna.distributions.CategoricalDistribution([True, False]),
+                            'Tol' : optuna.distributions.FloatDistribution(0, 1),
+                        },
+                        value=float(lines[7]),
+                    )
+                )
+            # print(study.best_params, study.best_trial.value)    
+            end_time = time.time()
+            total_time = end_time - start_time
+            best_params = study.best_params
+            output.append([size, best_params.get('Alpha'), best_params.get('L1_ratio'), best_params.get('fit_intercept'), best_params.get('Max_iter'), best_params.get('selection'), best_params.get('warm_start'), best_params.get('Tol'), total_time, study.best_trial.value])
+        print(output)
+
 
 # optuna_for_decision_tree('Wine_quality')
 optuna_for_lasso('Wine_quality')
+# optuna_for_elasticnet('Wine_quality')
 
 # import pandas as pd
 

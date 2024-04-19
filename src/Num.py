@@ -29,7 +29,7 @@ class Num:
         if x != "?": # ignore if value is ?
             self.n += 1
             # calculate mean value
-            if isinstance(x,str):
+            if isinstance(x,str) or x is None:
                 x = 0 ## in our case this only occurs if None
 
             d = x - self.mu

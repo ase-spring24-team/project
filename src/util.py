@@ -156,3 +156,18 @@ def write_to_csv(data_set, algorithm_name, column_names, data, pre_shuffled=Fals
             writer.writerow(column_names)
             for row in data:
                 writer.writerow(row)
+
+def combine_datasets():
+    # List to store your dataframes
+    datasets = ['Wine_quality', 'pom3a', 'pom3c', 'dtlz2', 'dtlz3', 'dtlz4', 'dtlz5', 'dtlz6', 'SS-K']
+    ml_algos = ['random_forest', 'lasso', 'knn', 'ElasticNet', 'decision tree']
+    for data_set in datasets:
+        for algorithm_name in ml_algos:
+            dataframes = []
+            for i in range(1, 6):
+                filename = f'../data/{data_set}/{algorithm_name}/{algorithm_name}_hyperparameters_{i}.csv'
+                print(filename)
+                df = pd.read_csv(filename)
+                dataframes.append(df)
+            combined_df = pd.concat(dataframes, ignore_index=True)
+            combined_df.to_csv(f'../data/{data_set}/{algorithm_name}/merged_hyperparameters.csv', index=False)

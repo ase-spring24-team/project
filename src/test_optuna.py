@@ -149,6 +149,53 @@ def optuna_for_elasticnet(dataset):
         print(output)
 
 
+def optuna_for_knn(dataset):
+    with open(f'../data/{dataset}/knn/merged_hyperparameters.csv', mode ='r')as file:
+        csv_file = csv.reader(file)
+        all_data = []
+        first_line = True
+        for row in csv_file:
+            if first_line:
+                first_line = False
+                continue
+            all_data.append(row)
+        output = []
+        for size in [9, 15, 50, 10000]:
+            random.shuffle(all_data)
+            study = optuna.create_study()
+            for i in range(1, size):
+                start_time = time.time()
+                lines = all_data[i]
+                study.add_trial(
+                    optuna.trial.create_trial(
+                        params={
+                            'N_neighbours' : int(lines[0]),
+                            'weights' : lines[1],
+                            'algorithm' : lines[2],
+                            'Leaf_size' : int(lines[3]),
+                            'P' : float(lines[4]),
+                            'metric' : lines[5],
+                        },
+                        distributions={
+                            'N_neighbours' : optuna.distributions.IntDistribution(1, 11),
+                            'weights' : optuna.distributions.CategoricalDistribution(['uniform', 'distance']),
+                            'algorithm' : optuna.distributions.CategoricalDistribution([ 'ball_tree', 'kd_tree', 'brute']),
+                            'Leaf_size' : optuna.distributions.IntDistribution(10, 101),
+                            'P' : optuna.distributions.FloatDistribution(1, 5),
+                            'metric' : optuna.distributions.CategoricalDistribution(['cityblock', 'euclidean', 'l1', 'l2', 'manhattan']),
+                        },
+                        value=float(lines[6]),
+                    )
+                )
+            # print(study.best_params, study.best_trial.value)    
+            end_time = time.time()
+            total_time = end_time - start_time
+            best_params = study.best_params
+            output.append([size, best_params.get('N_neighbours'), best_params.get('weights'), best_params.get('algorithm'), best_params.get('Leaf_size'), best_params.get('P'), best_params.get('metric'), total_time, study.best_trial.value])
+        print(output)
+
+
 # optuna_for_decision_tree('Wine_quality')
-optuna_for_lasso('Wine_quality')
+optuna_for_knn('Wine_quality')
+# optuna_for_lasso('Wine_quality')
 # optuna_for_elasticnet('Wine_quality')

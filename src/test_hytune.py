@@ -21,6 +21,8 @@ from Data import Data
 import Sample
 from datetime import date
 import util as l
+import test_optuna
+from Row import Row
 from the import the, SLOTS
 import random
 from statistics import mean, stdev
@@ -207,6 +209,16 @@ def get_best_bonr(num):
     # and not some other value by accident
     return best.d2h(d)
 
+def get_best_opt(num):
+    """
+    Runs optuna once and returns the best d2h value found
+    """
+    d = Data(the.file)
+    best = test_optuna.optuna_for_random_forest(the.file, num)
+    print(best)
+    return Row(best).d2h(d)
+
+
 def get_best_rrp(num=None):
     """
     Runs rrpN once and returns the best d2h value found
@@ -276,6 +288,14 @@ def ranking_stats(file_name, algo_name):
     rrp_doubletap_clock_time_list = []
     rand358_best_list = []
     rand358_clock_time_list = []
+
+    #optuna results
+    opt9_best_list = []
+    opt9_clock_time_list = []
+    opt_base_best_list = []
+    opt_base_clock_time_list = []
+    
+
     stats = []  # list of lists...
     print("Calculating Best and Tiny...")
     for i in range(20):
@@ -326,6 +346,16 @@ def ranking_stats(file_name, algo_name):
         rand358_best_list.append(get_best_rand(358))
         end_time = time.time()
         rand358_clock_time_list.append(end_time-start_time)
+
+        start_time = time.time()
+        opt9_best_list.append(get_best_opt(9))
+        end_time = time.time()
+        opt9_clock_time_list.append(end_time-start_time)
+
+        start_time = time.time()
+        opt_base_best_list.append(get_best_opt(10000 - 1))
+        end_time = time.time()
+        opt_base_clock_time_list.append(end_time-start_time)
 
     base_line_list = get_base_line_list(d.rows, d)  # returns a list of all rows d2h values
 
@@ -387,6 +417,16 @@ def ranking_stats(file_name, algo_name):
         writer.writerow(rand358_clock_time_list)
         writer.writerow([sum(rand358_clock_time_list)])
 
+        writer.writerow(['Optuna9'])
+        writer.writerow(opt9_best_list)
+        writer.writerow(opt9_clock_time_list)
+        writer.writerow([sum(opt9_clock_time_list)])
+
+        writer.writerow(['Optuna Baseline'])
+        writer.writerow(opt_base_best_list)
+        writer.writerow(opt_base_clock_time_list)
+        writer.writerow([sum(opt_base_clock_time_list)])
+
     std = stdev(base_line_list)  # standard deviation of all rows d2h values
     print(f"Best : {ceiling}")  #
     print(f"Tiny : {l.rnd(.35*std)}")  # WE NEED to change this later...
@@ -405,15 +445,19 @@ def ranking_stats(file_name, algo_name):
         Sample.SAMPLE(rrp_doubletap_best_list, "rrpDT"),
         Sample.SAMPLE(rand358_best_list, "rand358"),
         Sample.SAMPLE(base_line_list, "base"),
+        Sample.SAMPLE(opt_base_best_list, "opt base"),
+        Sample.SAMPLE(opt9_best_list, "opt 9"),
     ])
 
 if __name__ == '__main__':
-    the._set(SLOTS({"file":"../data/dtlz2/random_forest/random_forest_hyperparameters_1.csv", "__help": "", "m":2, "k":1, "p":2, "Half":256, "d":32, "D":4,
+    the._set(SLOTS({"file":"../data/dtlz2/random_forest/merged_hyperparameters.csv", "__help": "", "m":2, "k":1, "p":2, "Half":256, "d":32, "D":4,
                     "Far":.95, "seed":31210, "Beam":10, "bins":16, "Cut":.1, "Support":2}))
     random.seed(the.seed)
     # datasets = []
     datasets = [ 'SS-A', 'Wine_quality', 'pom3a', 'pom3c', 'dtlz2', 'dtlz3', 'dtlz4', 'dtlz5', 'dtlz6', 'SS-K']
     ml_algos = ['random_forest']
+
+
     #for dataset in datasets:
         #print(f'-------------------------------------------------------------------------------------------{dataset}-----------------------------------------------------------------------------------------')
         #create_lasso_data_set(dataset)

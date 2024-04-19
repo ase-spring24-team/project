@@ -195,8 +195,8 @@ def optuna_for_knn(dataset):
         print(output)
 
 
-def optuna_for_random_forest(dataset):
-    with open(f'../data/{dataset}/random_forest/merged_hyperparameters.csv', mode ='r')as file:
+def optuna_for_random_forest(filename, population):
+    with open(filename, mode ='r')as file:
         csv_file = csv.reader(file)
         all_data = []
         first_line = True
@@ -205,46 +205,37 @@ def optuna_for_random_forest(dataset):
                 first_line = False
                 continue
             all_data.append(row)
-        output = []
-        for size in [9, 15, 50, 10000]:
-            random.shuffle(all_data)
-            study = optuna.create_study()
-            for i in range(1, size):
-                start_time = time.time()
-                lines = all_data[i]
-                study.add_trial(
-                    optuna.trial.create_trial(
-                        params={
-                            'N_estimators' : int(lines[0]),
-                            'max_features' : None if lines[1] == '' else lines[1],
-                            'Max_depth' : float('0.0' if lines[2] == '' else lines[2]),
-                            'Min_samples_leaf' : int(lines[3]),
-                            'Min_samples_split' : int(lines[4]),
-                            'bootstrap' : lines[5] == 'True',
-                        },
-                        distributions={
-                            'N_estimators' : optuna.distributions.IntDistribution(5, 800),
-                            'max_features' : optuna.distributions.CategoricalDistribution([None, "sqrt", "log2"]),
-                            'Max_depth' : optuna.distributions.FloatDistribution(0, 300),
-                            'Min_samples_leaf' : optuna.distributions.IntDistribution(1, 50),
-                            'Min_samples_split' : optuna.distributions.IntDistribution(2, 20),
-                            'bootstrap' : optuna.distributions.CategoricalDistribution([True, False]),
-                        },
-                        value=float(lines[6]),
-                    )
+        random.shuffle(all_data)
+        study = optuna.create_study()
+        for i in range(1, min(population, len(all_data))):
+            lines = all_data[i]
+            study.add_trial(
+                optuna.trial.create_trial(
+                    params={
+                        'N_estimators' : int(lines[0]),
+                        'max_features' : None if lines[1] == '' else lines[1],
+                        'Max_depth' : float('0.0' if lines[2] == 'None' else lines[2]),
+                        'Min_samples_leaf' : int(lines[3]),
+                        'Min_samples_split' : int(lines[4]),
+                        'bootstrap' : lines[5] == 'True',
+                    },
+                    distributions={
+                        'N_estimators' : optuna.distributions.IntDistribution(5, 800),
+                        'max_features' : optuna.distributions.CategoricalDistribution(['None', "sqrt", "log2"]),
+                        'Max_depth' : optuna.distributions.FloatDistribution(0, 300),
+                        'Min_samples_leaf' : optuna.distributions.IntDistribution(1, 50),
+                        'Min_samples_split' : optuna.distributions.IntDistribution(2, 20),
+                        'bootstrap' : optuna.distributions.CategoricalDistribution([True, False]),
+                    },
+                    value=float(lines[6]),
                 )
-            # print(study.best_params, study.best_trial.value)    
-            end_time = time.time()
-            total_time = end_time - start_time
-            best_params = study.best_params
-            output.append([size, best_params.get('N_estimators'), best_params.get('max_features'), best_params.get('Max_depth'), best_params.get('Min_samples_leaf'), best_params.get('Min_samples_split'), best_params.get('bootstrap'), total_time, study.best_trial.value])
-        print(output)
+            )   
+        best_params = study.best_params
+        return [ best_params.get('N_estimators'), best_params.get('max_features'), best_params.get('Max_depth'), best_params.get('Min_samples_leaf'), best_params.get('Min_samples_split'), best_params.get('bootstrap'), study.best_trial.value]
 
 
-
-
+# optuna_for_random_forest('Wine_quality', 9)
 # optuna_for_decision_tree('Wine_quality')
 # optuna_for_knn('Wine_quality')
-optuna_for_random_forest('Wine_quality')
 # optuna_for_lasso('Wine_quality')
 # optuna_for_elasticnet('Wine_quality')

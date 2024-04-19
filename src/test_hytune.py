@@ -176,7 +176,7 @@ def create_knn_data_set(data_set):
 
     l.write_to_csv(data_set, "knn", ['N_neighbours', 'weights', 'algorithm', 'Leaf_size', 'P', 'metric', 'Error-'], all_data)
 
-def print_ranking_analysis(d):
+def print_ranking_analysis(d,file_name=None):
     """
     Prints out the ranking analysis
     """
@@ -185,7 +185,7 @@ def print_ranking_analysis(d):
     today = date.today()
     todays_date = today.strftime("%B %d, %Y")
     print(f"Date : {todays_date}")  # print current date
-    print(f"File : {the.file}")  # print file name
+    print(f"File : {file_name}")  # print file name
     print(f"Repeats : 20")  # print the number of repetitions(num of times we run bonr15
     # when building our sampling group for example)
     print(f"Seed : {the.seed}")
@@ -251,8 +251,9 @@ def ranking_stats(file_name, algo_name):
     """
     Runs smo, rrp, optuna, and hyperband and compares them all to each other
     """
-    d = Data(f'../data/{file_name}/{algo_name}/{algo_name}_hyperparameters_1.csv')  # just set d for easy use in print statements
-    print_ranking_analysis(d)
+    the.file = f'../data/{file_name}/{algo_name}/{algo_name}_hyperparameters_1.csv'
+    d = Data(the.file)  # just set d for easy use in print statements
+    print_ranking_analysis(d, file_name)
     all_rows = d.rows
     # Now we must sort all rows based on the distance to heaven to get our ceiling
     all_rows.sort(key=lambda x: x.d2h(d))
@@ -412,7 +413,8 @@ if __name__ == '__main__':
     random.seed(the.seed)
     # datasets = []
     datasets = [ 'SS-A', 'Wine_quality', 'pom3a', 'pom3c', 'dtlz2', 'dtlz3', 'dtlz4', 'dtlz5', 'dtlz6', 'SS-K']
-    optimization_algos = ['random_forest', 'lasso', 'knn', 'ElasticNet', 'decision tree']
+    datasets = ['dtlz6']
+    optimization_algos = ['lasso', 'knn', 'ElasticNet', 'decision tree']
     #for dataset in datasets:
         #print(f'-------------------------------------------------------------------------------------------{dataset}-----------------------------------------------------------------------------------------')
         #create_lasso_data_set(dataset)

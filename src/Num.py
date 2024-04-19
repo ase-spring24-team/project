@@ -29,6 +29,9 @@ class Num:
         if x != "?": # ignore if value is ?
             self.n += 1
             # calculate mean value
+            if isinstance(x,str):
+                x = 0 ## in our case this only occurs if None
+
             d = x - self.mu
             self.mu += d / self.n
             self.m2 += d * (x - self.mu)

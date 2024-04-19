@@ -205,7 +205,7 @@ def get_best_bonr(num):
     #print(_bests[0].d2h(d))
     assert best.d2h(d) <= _bests[0].d2h(d)  # Tests that we are getting the best value based on d2h
     # and not some other value by accident
-    return l.rnd(best.d2h(d))
+    return best.d2h(d)
 
 def get_best_rrp(num=None):
     """
@@ -215,7 +215,7 @@ def get_best_rrp(num=None):
     best, rest, evals = d.branch(num)  # num is the stop number (in regular rrp, the num is half
     best.rows.sort(key=lambda x: x.d2h(d))
     # the length of the data set
-    return l.rnd(best.rows[0].d2h(d))
+    return best.rows[0].d2h(d)
 
 def get_best_rrpDT():
     """
@@ -226,7 +226,7 @@ def get_best_rrpDT():
     best2, _, evals2 = best1.branch(4)
     best2.rows.sort(key=lambda x: x.d2h(d))
     # the length of the data set
-    return l.rnd(best2.rows[0].d2h(d))
+    return best2.rows[0].d2h(d)
 
 def get_best_rand(num):
     """
@@ -235,7 +235,7 @@ def get_best_rand(num):
     d = Data(the.file)
     rows = random.sample(d.rows, num)  # sample N number of random rows
     rows.sort(key=lambda x: x.d2h(d))  # sort the rows by d2h and pull out the best value
-    return l.rnd(rows[0].d2h(d))  # return the d2h of the best row
+    return rows[0].d2h(d)  # return the d2h of the best row
 
 def get_base_line_list(rows,d):
     """

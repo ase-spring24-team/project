@@ -1,21 +1,25 @@
 import csv
 import optuna
 import random
+import time
+import util as l
 
-def optuna_for_decision_tree(dataset, size):
-    for i in range(1, 6):
-        study = optuna.create_study()
-        with open(f'../data/{dataset}/decision tree/decision tree_hyperparameters_{i}.csv', mode ='r')as file:
-            csv_file = csv.reader(file)
-            all_data = []
-            first_line = True
-            for row in csv_file:
-                if first_line:
-                    first_line = False
-                    continue
-                all_data.append(row)
+def optuna_for_decision_tree(dataset):
+    with open(f'../data/{dataset}/decision tree/merged_hyperparameters.csv', mode ='r')as file:
+        csv_file = csv.reader(file)
+        all_data = []
+        first_line = True
+        for row in csv_file:
+            if first_line:
+                first_line = False
+                continue
+            all_data.append(row)
+        output = []
+        for size in [9, 15, 50, 10000]:
             random.shuffle(all_data)
+            study = optuna.create_study()
             for i in range(1, size):
+                start_time = time.time()
                 lines = all_data[i]
                 study.add_trial(
                     optuna.trial.create_trial(
@@ -40,7 +44,13 @@ def optuna_for_decision_tree(dataset, size):
                         value=float(lines[7]),
                     )
                 )
-            print(study.best_params, study.best_trial.value)
+            end_time = time.time()
+            total_time = end_time - start_time
+            best_params = study.best_params
+            output.append([size, best_params.get('criterion'), best_params.get('splitter'), best_params.get('min_samples_split'), best_params.get('min_samples_leaf'), best_params.get('ccp_alpha'), best_params.get('max_depth'), total_time, study.best_trial.value])
+            # print(study.best_params, study.best_trial.value)
+        # l.write_to_csv(output, "decision tree",['criterion', 'splitter', 'min_samples_split', 'min_samples_leaf', 'ccp_alpha', 'max_depth', 'Clock_speed-', 'Error-'], all_data)   
+        print(output)
 
 
 def optuna_for_lasso(dataset):
@@ -78,7 +88,7 @@ def optuna_for_lasso(dataset):
                     )
             print(study.best_params, study.best_trial.value)    
 
-# optuna_for_decision_tree('Wine_quality', 2)
+optuna_for_decision_tree('Wine_quality')
 # optuna_for_lasso()
 
 # import pandas as pd

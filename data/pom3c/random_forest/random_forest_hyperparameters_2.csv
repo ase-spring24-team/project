@@ -1,4 +1,4 @@
-n_estimators,max_features,max_depth,min_samples_leaf,min_samples_split,bootstrap,Error-
+N_estimators,max_features,Max_depth,Min_samples_leaf,Min_samples_split,bootstrap,Error-
 469,,257,44,6,False,0.13002720996758318
 285,sqrt,242,22,13,False,0.13339236482820302
 181,sqrt,244,49,12,True,0.14956462114667185

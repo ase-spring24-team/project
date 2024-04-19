@@ -21,6 +21,17 @@ class Num:
         self.lo = 1E30
         self.heaven = 0 if s.endswith("-") else 1
 
+    def none_fixer(self, x):
+        """
+        This function is designed to fix the none typo in random_forest
+        :param x:
+        :return:
+        """
+        if isinstance(x, str) or x is None:
+            return 0  ## in our case this only occurs if None
+        else:
+            return x
+
     def add(self, x):
         """
         Function that adds a value
@@ -29,8 +40,7 @@ class Num:
         if x != "?": # ignore if value is ?
             self.n += 1
             # calculate mean value
-            if isinstance(x,str) or x is None:
-                x = 0 ## in our case this only occurs if None
+            x = self.none_fixer(x)
 
             d = x - self.mu
             self.mu += d / self.n
@@ -65,10 +75,12 @@ class Num:
         if x == "?":
             return x
         else:
+            x = self.none_fixer(x)
             return (x - self.lo) / (self.hi - self.lo + 1E-30)
 
     # Likelihood
     def like(self, x, _):
+        x = self.none_fixer(x)
         mu, sd = self.mid(), (self.div() + 1E-30)
         nom = 2.718 ** (-.5*(x - mu)**2 / (sd **2))
         denom = (sd*2.5 + 1E-30)
@@ -95,6 +107,7 @@ class Num:
         """
         Discretization of our NUM
         """
+        x = self.none_fixer(x)
         tmp = (self.hi - self.lo)/(the.bins-1)
         return 1 if self.hi == self.lo else int(math.floor(x/tmp + .5)*tmp)
 

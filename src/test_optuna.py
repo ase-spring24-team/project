@@ -54,42 +54,54 @@ def optuna_for_decision_tree(dataset):
 
 
 def optuna_for_lasso(dataset):
-    for i in range(1, 6):
-        study = optuna.create_study()
-        with open(f'../data/{dataset}/lasso/lasso_hyperparameters_{i}.csv', mode ='r')as file:
-            csv_file = csv.reader(file)
-            first_line = True
-            for lines in csv_file:
-                    if first_line:
-                        first_line = False
-                        continue
-                    study.add_trial(
-                        optuna.trial.create_trial(
-                            params={
-                                'Alpha' : int(lines[0]),
-                                'Max_iter' : int(lines[1]),
-                                'Tolerance' : float(lines[2]),
-                                'fit_intercept' : lines[3] == 'True',
-                                'positive' : lines[4] == 'True',
-                                'warm_start' : lines[5] == 'True',
-                                'selection' : lines[6],
-                            },
-                            distributions={
-                                'Alpha' : optuna.distributions.IntDistribution(1, 100),
-                                'Max_iter' : optuna.distributions.IntDistribution(1, 10000),
-                                'Tolerance' : optuna.distributions.FloatDistribution(0, 1),
-                                'fit_intercept' : optuna.distributions.CategoricalDistribution([True, False]),
-                                'positive' : optuna.distributions.CategoricalDistribution([True, False]),
-                                'warm_start' : optuna.distributions.CategoricalDistribution([True, False]),
-                                'selection' : optuna.distributions.CategoricalDistribution(['cyclic', 'random']),
-                            },
-                            value=float(lines[7]),
-                        )
+    with open(f'../data/{dataset}/lasso/merged_hyperparameters.csv', mode ='r')as file:
+        csv_file = csv.reader(file)
+        all_data = []
+        first_line = True
+        for row in csv_file:
+            if first_line:
+                first_line = False
+                continue
+            all_data.append(row)
+        output = []
+        for size in [9, 15, 50, 10000]:
+            random.shuffle(all_data)
+            study = optuna.create_study()
+            for i in range(1, size):
+                start_time = time.time()
+                lines = all_data[i]
+                study.add_trial(
+                    optuna.trial.create_trial(
+                        params={
+                            'Alpha' : int(lines[0]),
+                            'Max_iter' : int(lines[1]),
+                            'Tolerance' : float(lines[2]),
+                            'fit_intercept' : lines[3] == 'True',
+                            'positive' : lines[4] == 'True',
+                            'warm_start' : lines[5] == 'True',
+                            'selection' : lines[6],
+                        },
+                        distributions={
+                            'Alpha' : optuna.distributions.IntDistribution(1, 100),
+                            'Max_iter' : optuna.distributions.IntDistribution(1, 10000),
+                            'Tolerance' : optuna.distributions.FloatDistribution(0, 1),
+                            'fit_intercept' : optuna.distributions.CategoricalDistribution([True, False]),
+                            'positive' : optuna.distributions.CategoricalDistribution([True, False]),
+                            'warm_start' : optuna.distributions.CategoricalDistribution([True, False]),
+                            'selection' : optuna.distributions.CategoricalDistribution(['cyclic', 'random']),
+                        },
+                        value=float(lines[7]),
                     )
-            print(study.best_params, study.best_trial.value)    
+                )
+            # print(study.best_params, study.best_trial.value)    
+            end_time = time.time()
+            total_time = end_time - start_time
+            best_params = study.best_params
+            output.append([size, best_params.get('Alpha'), best_params.get('Max_iter'), best_params.get('Tolerance'), best_params.get('fit_intercept'), best_params.get('positive'), best_params.get('warm_start'), best_params.get('selection'), total_time, study.best_trial.value])
+            print(output)
 
-optuna_for_decision_tree('Wine_quality')
-# optuna_for_lasso()
+# optuna_for_decision_tree('Wine_quality')
+optuna_for_lasso('Wine_quality')
 
 # import pandas as pd
 

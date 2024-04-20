@@ -239,6 +239,15 @@ def get_best_rand(num):
     rows.sort(key=lambda x: x.d2h(d))  # sort the rows by d2h and pull out the best value
     return rows[0].d2h(d)  # return the d2h of the best row
 
+def get_best_opt(num):
+    """
+    Runs optuna once and returns the best d2h value found
+    """
+    d = Data(the.file)
+    best = test_optuna.optuna_for_random_forest(the.file, num)
+    print(best)
+    return Row(best).d2h(d)
+
 def get_base_line_list(rows,d):
     """
     Takes a list of all rows in the data set d, and returns a list of all row's d2h values

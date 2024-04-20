@@ -239,7 +239,7 @@ def get_best_rrp(num=None):
     best, rest, evals = d.branch(num)  # num is the stop number (in regular rrp, the num is half
     best.rows.sort(key=lambda x: x.d2h(d))
     # the length of the data set
-    return best.rows[0].d2h(d)
+    return [best.rows[0].d2h(d), evals]
 
 def get_best_rrpDT():
     """
@@ -250,7 +250,7 @@ def get_best_rrpDT():
     best2, _, evals2 = best1.branch(4)
     best2.rows.sort(key=lambda x: x.d2h(d))
     # the length of the data set
-    return best2.rows[0].d2h(d)
+    return [best2.rows[0].d2h(d), evals1+evals2]
 
 def get_best_rand(num):
     """
@@ -295,8 +295,10 @@ def ranking_stats(file_name, algo_name, iterations = 20):
     rand20_best_list = []
     rand20_clock_time_list = []
     rrp_best_list = []
+    rrp_eval_list = []
     rrp_clock_time_list = []
     rrp_doubletap_best_list = []
+    rrpDT_eval_list = []
     rrp_doubletap_clock_time_list = []
     rand358_best_list = []
     rand358_clock_time_list = []
@@ -304,8 +306,10 @@ def ranking_stats(file_name, algo_name, iterations = 20):
     #optuna results
     opt9_best_list = []
     opt9_clock_time_list = []
-    opt_base_best_list = []
-    opt_base_clock_time_list = []
+    opt15_best_list = []
+    opt15_clock_time_list = []
+    opt20_best_list = []
+    opt20_clock_time_list = []
     
 
     stats = []  # list of lists...
@@ -344,13 +348,15 @@ def ranking_stats(file_name, algo_name, iterations = 20):
         end_time = time.time()
         rand20_clock_time_list.append(end_time-start_time)
 
+        rrp_eval_list.append(get_best_rrp()[1])
         start_time = time.time()
-        rrp_best_list.append(get_best_rrp())
+        rrp_best_list.append(get_best_rrp()[0])
         end_time = time.time()
         rrp_clock_time_list.append(end_time-start_time)
 
+        rrpDT_eval_list.append(get_best_rrpDT()[1])
         start_time = time.time()
-        rrp_doubletap_best_list.append(get_best_rrpDT())
+        rrp_doubletap_best_list.append(get_best_rrpDT()[0])
         end_time = time.time()
         rrp_doubletap_clock_time_list.append(end_time-start_time)
 
@@ -365,9 +371,14 @@ def ranking_stats(file_name, algo_name, iterations = 20):
         opt9_clock_time_list.append(end_time-start_time)
 
         start_time = time.time()
-        opt_base_best_list.append(get_best_opt(10000 - 1, algo_name))
+        opt15_best_list.append(get_best_opt(15, algo_name))
         end_time = time.time()
-        opt_base_clock_time_list.append(end_time-start_time)
+        opt15_clock_time_list.append(end_time - start_time)
+
+        start_time = time.time()
+        opt20_best_list.append(get_best_opt(20, algo_name))
+        end_time = time.time()
+        opt20_clock_time_list.append(end_time - start_time)
 
     base_line_list = get_base_line_list(d.rows, d)  # returns a list of all rows d2h values
 
@@ -403,11 +414,13 @@ def ranking_stats(file_name, algo_name, iterations = 20):
         writer.writerow(rrp_best_list)
         writer.writerow(rrp_clock_time_list)
         writer.writerow([sum(rrp_clock_time_list)])
+        writer.writerow(rrp_eval_list)
 
         writer.writerow(['RRPDT'])
         writer.writerow(rrp_doubletap_best_list)
         writer.writerow(rrp_doubletap_clock_time_list)
         writer.writerow([sum(rrp_doubletap_clock_time_list)])
+        writer.writerow(rrpDT_eval_list)
 
         writer.writerow(['Random9'])
         writer.writerow(rand9_best_list)
@@ -434,16 +447,21 @@ def ranking_stats(file_name, algo_name, iterations = 20):
         writer.writerow(opt9_clock_time_list)
         writer.writerow([sum(opt9_clock_time_list)])
 
-        writer.writerow(['Optuna Baseline'])
-        writer.writerow(opt_base_best_list)
-        writer.writerow(opt_base_clock_time_list)
-        writer.writerow([sum(opt_base_clock_time_list)])
+        writer.writerow(['Optuna15'])
+        writer.writerow(opt15_best_list)
+        writer.writerow(opt15_clock_time_list)
+        writer.writerow([sum(opt15_clock_time_list)])
+
+        writer.writerow(['Optuna20'])
+        writer.writerow(opt20_best_list)
+        writer.writerow(opt20_clock_time_list)
+        writer.writerow([sum(opt20_clock_time_list)])
 
     std = stdev(base_line_list)  # standard deviation of all rows d2h values
     print(f"Best : {ceiling}")  #
     print(f"Tiny : {l.rnd(.35*std)}")  # WE NEED to change this later...
 
-    print("base bonr9 rrp9 rand9 bonr15 rand15 bonr20 rand20 rrp rrpDT rand358")
+    print("base bonr9 opt9 rand9 bonr15 opt15 rand15 bonr20 opt20 rand20 rrp rrpDT rand358")
     print("Ranking Report: ")
     #  Below is the code that will actually stratify and print the different treatments
     Sample.eg0([
@@ -457,8 +475,9 @@ def ranking_stats(file_name, algo_name, iterations = 20):
         Sample.SAMPLE(rrp_doubletap_best_list, "rrpDT"),
         Sample.SAMPLE(rand358_best_list, "rand358"),
         Sample.SAMPLE(base_line_list, "base"),
-        Sample.SAMPLE(opt_base_best_list, "opt base"),
         Sample.SAMPLE(opt9_best_list, "opt 9"),
+        Sample.SAMPLE(opt15_best_list, "opt 15"),
+        Sample.SAMPLE(opt20_best_list, "opt 20"),
     ])
 
 if __name__ == '__main__':
@@ -483,4 +502,4 @@ if __name__ == '__main__':
     # time to optimize and run stats
     for dataset in datasets:
         for algo_name in ml_algos:
-            ranking_stats(dataset, algo_name, 1)
+            ranking_stats(dataset, algo_name, 20)

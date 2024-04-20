@@ -21,6 +21,8 @@ from Data import Data
 import Sample
 from datetime import date
 import util as l
+import test_optuna
+from Row import Row
 from the import the, SLOTS
 import random
 from statistics import mean, stdev
@@ -247,13 +249,13 @@ def get_base_line_list(rows,d):
         d2h_list.append(row.d2h(d))
     return d2h_list
 
-def ranking_stats(file_name, algo_name):
+def ranking_stats(file_name, algo_name, iterations = 20):
     """
     Runs smo, rrp, optuna, and hyperband and compares them all to each other
     """
     the.file = f'../data/{file_name}/{algo_name}/merged_hyperparameters.csv'
     d = Data(the.file)  # just set d for easy use in print statements
-    print_ranking_analysis(d, file_name)
+    print_ranking_analysis(d, file_name, algo_name)
     all_rows = d.rows
     # Now we must sort all rows based on the distance to heaven to get our ceiling
     all_rows.sort(key=lambda x: x.d2h(d))
@@ -276,9 +278,17 @@ def ranking_stats(file_name, algo_name):
     rrp_doubletap_clock_time_list = []
     rand358_best_list = []
     rand358_clock_time_list = []
+
+    #optuna results
+    opt9_best_list = []
+    opt9_clock_time_list = []
+    opt_base_best_list = []
+    opt_base_clock_time_list = []
+
+
     stats = []  # list of lists...
     print("Calculating Best and Tiny...")
-    for i in range(20):
+    for i in range(iterations):
         # iterate our 20 times
         start_time = time.time()
         bonr9_best_list.append(get_best_bonr(9))  # calls to a function that runs data for bonr9
@@ -326,6 +336,16 @@ def ranking_stats(file_name, algo_name):
         rand358_best_list.append(get_best_rand(358))
         end_time = time.time()
         rand358_clock_time_list.append(end_time-start_time)
+
+        start_time = time.time()
+        opt9_best_list.append(get_best_opt(9, algo_name))
+        end_time = time.time()
+        opt9_clock_time_list.append(end_time-start_time)
+
+        start_time = time.time()
+        opt_base_best_list.append(get_best_opt(10000 - 1, algo_name))
+        end_time = time.time()
+        opt_base_clock_time_list.append(end_time-start_time)
 
     base_line_list = get_base_line_list(d.rows, d)  # returns a list of all rows d2h values
 
@@ -387,6 +407,16 @@ def ranking_stats(file_name, algo_name):
         writer.writerow(rand358_clock_time_list)
         writer.writerow([sum(rand358_clock_time_list)])
 
+        writer.writerow(['Optuna9'])
+        writer.writerow(opt9_best_list)
+        writer.writerow(opt9_clock_time_list)
+        writer.writerow([sum(opt9_clock_time_list)])
+
+        writer.writerow(['Optuna Baseline'])
+        writer.writerow(opt_base_best_list)
+        writer.writerow(opt_base_clock_time_list)
+        writer.writerow([sum(opt_base_clock_time_list)])
+
     std = stdev(base_line_list)  # standard deviation of all rows d2h values
     print(f"Best : {ceiling}")  #
     print(f"Tiny : {l.rnd(.35*std)}")  # WE NEED to change this later...
@@ -405,10 +435,12 @@ def ranking_stats(file_name, algo_name):
         Sample.SAMPLE(rrp_doubletap_best_list, "rrpDT"),
         Sample.SAMPLE(rand358_best_list, "rand358"),
         Sample.SAMPLE(base_line_list, "base"),
+        Sample.SAMPLE(opt_base_best_list, "opt base"),
+        Sample.SAMPLE(opt9_best_list, "opt 9"),
     ])
 
 if __name__ == '__main__':
-    the._set(SLOTS({"file":"../data/dtlz2/random_forest/random_forest_hyperparameters_1.csv", "__help": "", "m":2, "k":1, "p":2, "Half":256, "d":32, "D":4,
+    the._set(SLOTS({"file":"../data/dtlz2/random_forest/merged_hyperparameters.csv", "__help": "", "m":2, "k":1, "p":2, "Half":256, "d":32, "D":4,
                     "Far":.95, "seed":31210, "Beam":10, "bins":16, "Cut":.1, "Support":2}))
     random.seed(the.seed)
     # datasets = []
@@ -426,4 +458,4 @@ if __name__ == '__main__':
     # time to optimize and run stats
     for dataset in datasets:
         for algo_name in ml_algos:
-            ranking_stats(dataset, algo_name)
+            ranking_stats(dataset, algo_name, 1)

@@ -178,7 +178,7 @@ def create_knn_data_set(data_set):
 
     l.write_to_csv(data_set, "knn", ['N_neighbours', 'weights', 'algorithm', 'Leaf_size', 'P', 'metric', 'Error-'], all_data)
 
-def print_ranking_analysis(d,file_name=None):
+def print_ranking_analysis(d,file_name=None, algo_name=None):
     """
     Prints out the ranking analysis
     """
@@ -188,6 +188,7 @@ def print_ranking_analysis(d,file_name=None):
     todays_date = today.strftime("%B %d, %Y")
     print(f"Date : {todays_date}")  # print current date
     print(f"File : {file_name}")  # print file name
+    print(f"ML algo: {algo_name}")
     print(f"Repeats : 20")  # print the number of repetitions(num of times we run bonr15
     # when building our sampling group for example)
     print(f"Seed : {the.seed}")
@@ -208,6 +209,27 @@ def get_best_bonr(num):
     assert best.d2h(d) <= _bests[0].d2h(d)  # Tests that we are getting the best value based on d2h
     # and not some other value by accident
     return best.d2h(d)
+
+def get_best_opt(num, algo_name):
+    """
+    Runs optuna once and returns the best d2h value found
+    """
+    d = Data(the.file)
+    ['random_forest', 'ElasticNet', 'lasso', 'knn', 'decision tree']
+    if algo_name == "random_forest": 
+        opt = test_optuna.optuna_for_random_forest
+    elif algo_name == "ElasticNet": 
+        opt = test_optuna.optuna_for_elasticnet
+    elif algo_name == "lasso": 
+        opt = test_optuna.optuna_for_lasso
+    elif algo_name == "knn": 
+        opt = test_optuna.optuna_for_knn
+    elif algo_name == "decision tree": 
+        opt = test_optuna.optuna_for_decision_tree
+    best = opt(the.file, num)
+    print(best)
+    return Row(best).d2h(d)
+
 
 def get_best_rrp(num=None):
     """
@@ -238,15 +260,6 @@ def get_best_rand(num):
     rows = random.sample(d.rows, num)  # sample N number of random rows
     rows.sort(key=lambda x: x.d2h(d))  # sort the rows by d2h and pull out the best value
     return rows[0].d2h(d)  # return the d2h of the best row
-
-def get_best_opt(num):
-    """
-    Runs optuna once and returns the best d2h value found
-    """
-    d = Data(the.file)
-    best = test_optuna.optuna_for_random_forest(the.file, num)
-    print(best)
-    return Row(best).d2h(d)
 
 def get_base_line_list(rows,d):
     """
@@ -293,7 +306,7 @@ def ranking_stats(file_name, algo_name, iterations = 20):
     opt9_clock_time_list = []
     opt_base_best_list = []
     opt_base_clock_time_list = []
-
+    
 
     stats = []  # list of lists...
     print("Calculating Best and Tiny...")
@@ -453,13 +466,16 @@ if __name__ == '__main__':
                     "Far":.95, "seed":31210, "Beam":10, "bins":16, "Cut":.1, "Support":2}))
     random.seed(the.seed)
     # datasets = []
-    datasets = [ 'SS-A', 'Wine_quality', 'pom3a', 'pom3c', 'dtlz2', 'dtlz3', 'dtlz4', 'dtlz5', 'dtlz6', 'SS-K']
-    datasets = ['pom3c']
-    ml_algos = ['lasso']
+    datasets = ['SS-A', 'Wine_quality', 'pom3a', 'pom3c', 'dtlz2', 'dtlz3', 'dtlz4', 'dtlz5', 'dtlz6', 'SS-K']
+    #datasets = ['dtlz2']
+    ml_algos = ['lasso', 'random_forest', 'ElasticNet', 'knn', 'decision tree']
+    #ml_algos = ['random_forest']
+
+
     #for dataset in datasets:
         #print(f'-------------------------------------------------------------------------------------------{dataset}-----------------------------------------------------------------------------------------')
         #create_lasso_data_set(dataset)
-        # create_dt_regressor_data_set(dataset)
+        #create_dt_regressor_data_set(dataset)
         #create_random_forest_regression_data_set(dataset)
         #create_elasticnet_data_set(dataset)
         #ranking_stats(dataset)  # runs on 'dataset'
@@ -467,4 +483,4 @@ if __name__ == '__main__':
     # time to optimize and run stats
     for dataset in datasets:
         for algo_name in ml_algos:
-            ranking_stats(dataset, algo_name, 20)
+            ranking_stats(dataset, algo_name, 1)

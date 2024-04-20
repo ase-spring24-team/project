@@ -467,8 +467,9 @@ if __name__ == '__main__':
     random.seed(the.seed)
     # datasets = []
     datasets = ['SS-A', 'Wine_quality', 'pom3a', 'pom3c', 'dtlz2', 'dtlz3', 'dtlz4', 'dtlz5', 'dtlz6', 'SS-K']
-    datasets = ['dtlz2']
+    #datasets = ['dtlz2']
     ml_algos = ['lasso', 'random_forest', 'ElasticNet', 'knn', 'decision tree']
+    #ml_algos = ['random_forest']
 
 
     #for dataset in datasets:

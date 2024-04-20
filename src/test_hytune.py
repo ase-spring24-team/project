@@ -251,7 +251,7 @@ def ranking_stats(file_name, algo_name):
     """
     Runs smo, rrp, optuna, and hyperband and compares them all to each other
     """
-    the.file = f'../data/{file_name}/{algo_name}/{algo_name}_hyperparameters_1.csv'
+    the.file = f'../data/{file_name}/{algo_name}/merged_hyperparameters.csv'
     d = Data(the.file)  # just set d for easy use in print statements
     print_ranking_analysis(d, file_name)
     all_rows = d.rows
@@ -413,7 +413,8 @@ if __name__ == '__main__':
     random.seed(the.seed)
     # datasets = []
     datasets = [ 'SS-A', 'Wine_quality', 'pom3a', 'pom3c', 'dtlz2', 'dtlz3', 'dtlz4', 'dtlz5', 'dtlz6', 'SS-K']
-    ml_algos = ['random_forest']
+    datasets = ['pom3c']
+    ml_algos = ['lasso']
     #for dataset in datasets:
         #print(f'-------------------------------------------------------------------------------------------{dataset}-----------------------------------------------------------------------------------------')
         #create_lasso_data_set(dataset)

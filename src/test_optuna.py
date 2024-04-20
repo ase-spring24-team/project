@@ -4,8 +4,8 @@ import random
 import time
 import util as l
 
-def optuna_for_decision_tree(dataset):
-    with open(f'../data/{dataset}/decision tree/merged_hyperparameters.csv', mode ='r')as file:
+def optuna_for_decision_tree(filename, population):
+    with open(filename, mode ='r')as file:
         csv_file = csv.reader(file)
         all_data = []
         first_line = True
@@ -14,12 +14,10 @@ def optuna_for_decision_tree(dataset):
                 first_line = False
                 continue
             all_data.append(row)
-        output = []
-        for size in [9, 15, 50, 10000]:
-            random.shuffle(all_data)
-            study = optuna.create_study()
-            for i in range(1, size):
-                start_time = time.time()
+        random.shuffle(all_data)
+        study = optuna.create_study()
+
+        for i in range(1, min(population, len(all_data))):
                 lines = all_data[i]
                 study.add_trial(
                     optuna.trial.create_trial(
@@ -44,17 +42,14 @@ def optuna_for_decision_tree(dataset):
                         value=float(lines[7]),
                     )
                 )
-            end_time = time.time()
-            total_time = end_time - start_time
-            best_params = study.best_params
-            output.append([size, best_params.get('criterion'), best_params.get('splitter'), best_params.get('min_samples_split'), best_params.get('min_samples_leaf'), best_params.get('ccp_alpha'), best_params.get('max_depth'), total_time, study.best_trial.value])
-            # print(study.best_params, study.best_trial.value)
-        # l.write_to_csv(output, "decision tree",['criterion', 'splitter', 'min_samples_split', 'min_samples_leaf', 'ccp_alpha', 'max_depth', 'Clock_speed-', 'Error-'], all_data)   
-        print(output)
+        best_params = study.best_params
+        return [ best_params.get('criterion'), best_params.get('splitter'), best_params.get('min_samples_split'), best_params.get('min_samples_leaf'), best_params.get('ccp_alpha'), best_params.get('max_depth'),best_params.get('min_weight_fraction_leaf'), study.best_trial.value]
 
 
-def optuna_for_lasso(dataset):
-    with open(f'../data/{dataset}/lasso/merged_hyperparameters.csv', mode ='r')as file:
+
+
+def optuna_for_lasso(filename, population):
+    with open(filename, mode ='r')as file:
         csv_file = csv.reader(file)
         all_data = []
         first_line = True
@@ -63,12 +58,10 @@ def optuna_for_lasso(dataset):
                 first_line = False
                 continue
             all_data.append(row)
-        output = []
-        for size in [9, 15, 50, 10000]:
-            random.shuffle(all_data)
-            study = optuna.create_study()
-            for i in range(1, size):
-                start_time = time.time()
+        random.shuffle(all_data)
+        study = optuna.create_study()
+
+        for i in range(1, min(population, len(all_data))):
                 lines = all_data[i]
                 study.add_trial(
                     optuna.trial.create_trial(
@@ -94,15 +87,13 @@ def optuna_for_lasso(dataset):
                     )
                 )
             # print(study.best_params, study.best_trial.value)    
-            end_time = time.time()
-            total_time = end_time - start_time
-            best_params = study.best_params
-            output.append([size, best_params.get('Alpha'), best_params.get('Max_iter'), best_params.get('Tolerance'), best_params.get('fit_intercept'), best_params.get('positive'), best_params.get('warm_start'), best_params.get('selection'), total_time, study.best_trial.value])
-        print(output)
+        best_params = study.best_params
+        return [ best_params.get('Alpha'), best_params.get('Max_iter'), best_params.get('Tolerance'), best_params.get('fit_intercept'), best_params.get('positive'), best_params.get('warm_start'), best_params.get('selection'),study.best_trial.value]
 
 
-def optuna_for_elasticnet(dataset):
-    with open(f'../data/{dataset}/ElasticNet/merged_hyperparameters.csv', mode ='r')as file:
+
+def optuna_for_elasticnet(filename, population):
+    with open(filename, mode ='r')as file:
         csv_file = csv.reader(file)
         all_data = []
         first_line = True
@@ -111,12 +102,10 @@ def optuna_for_elasticnet(dataset):
                 first_line = False
                 continue
             all_data.append(row)
-        output = []
-        for size in [9, 15, 50, 10000]:
-            random.shuffle(all_data)
-            study = optuna.create_study()
-            for i in range(1, size):
-                start_time = time.time()
+        random.shuffle(all_data)
+        study = optuna.create_study()
+
+        for i in range(1, min(population, len(all_data))):
                 lines = all_data[i]
                 study.add_trial(
                     optuna.trial.create_trial(
@@ -142,15 +131,14 @@ def optuna_for_elasticnet(dataset):
                     )
                 )
             # print(study.best_params, study.best_trial.value)    
-            end_time = time.time()
-            total_time = end_time - start_time
-            best_params = study.best_params
-            output.append([size, best_params.get('Alpha'), best_params.get('L1_ratio'), best_params.get('fit_intercept'), best_params.get('Max_iter'), best_params.get('selection'), best_params.get('warm_start'), best_params.get('Tol'), total_time, study.best_trial.value])
-        print(output)
+        best_params = study.best_params
+        return [ best_params.get('Alpha'), best_params.get('L1_ratio'), best_params.get('fit_intercept'), best_params.get('Max_iter'), best_params.get('selection'), best_params.get('warm_start'), best_params.get('Tol'),study.best_trial.value]
 
 
-def optuna_for_knn(dataset):
-    with open(f'../data/{dataset}/knn/merged_hyperparameters.csv', mode ='r')as file:
+
+
+def optuna_for_knn(filename, population):
+    with open(filename, mode ='r')as file:
         csv_file = csv.reader(file)
         all_data = []
         first_line = True
@@ -159,12 +147,10 @@ def optuna_for_knn(dataset):
                 first_line = False
                 continue
             all_data.append(row)
-        output = []
-        for size in [9, 15, 50, 10000]:
-            random.shuffle(all_data)
-            study = optuna.create_study()
-            for i in range(1, size):
-                start_time = time.time()
+        random.shuffle(all_data)
+        study = optuna.create_study()
+
+        for i in range(1, min(population, len(all_data))):
                 lines = all_data[i]
                 study.add_trial(
                     optuna.trial.create_trial(
@@ -188,12 +174,8 @@ def optuna_for_knn(dataset):
                     )
                 )
             # print(study.best_params, study.best_trial.value)    
-            end_time = time.time()
-            total_time = end_time - start_time
-            best_params = study.best_params
-            output.append([size, best_params.get('N_neighbours'), best_params.get('weights'), best_params.get('algorithm'), best_params.get('Leaf_size'), best_params.get('P'), best_params.get('metric'), total_time, study.best_trial.value])
-        print(output)
-
+        best_params = study.best_params
+        return [ best_params.get('N_neighbours'), best_params.get('weights'), best_params.get('algorithm'), best_params.get('Leaf_size'), best_params.get('P'), best_params.get('metric'), study.best_trial.value]
 
 def optuna_for_random_forest(filename, population):
     with open(filename, mode ='r')as file:
@@ -214,14 +196,14 @@ def optuna_for_random_forest(filename, population):
                     params={
                         'N_estimators' : int(lines[0]),
                         'max_features' : None if lines[1] == '' else lines[1],
-                        'Max_depth' : float('0.0' if lines[2] == 'None' else lines[2]),
+                        'Max_depth' : float('0.0' if lines[2] == '' else lines[2]),
                         'Min_samples_leaf' : int(lines[3]),
                         'Min_samples_split' : int(lines[4]),
                         'bootstrap' : lines[5] == 'True',
                     },
                     distributions={
                         'N_estimators' : optuna.distributions.IntDistribution(5, 800),
-                        'max_features' : optuna.distributions.CategoricalDistribution(['None', "sqrt", "log2"]),
+                        'max_features' : optuna.distributions.CategoricalDistribution([None, "sqrt", "log2"]),
                         'Max_depth' : optuna.distributions.FloatDistribution(0, 300),
                         'Min_samples_leaf' : optuna.distributions.IntDistribution(1, 50),
                         'Min_samples_split' : optuna.distributions.IntDistribution(2, 20),
@@ -234,8 +216,8 @@ def optuna_for_random_forest(filename, population):
         return [ best_params.get('N_estimators'), best_params.get('max_features'), best_params.get('Max_depth'), best_params.get('Min_samples_leaf'), best_params.get('Min_samples_split'), best_params.get('bootstrap'), study.best_trial.value]
 
 
-# optuna_for_random_forest('Wine_quality', 9)
-# optuna_for_decision_tree('Wine_quality')
-# optuna_for_knn('Wine_quality')
-# optuna_for_lasso('Wine_quality')
-# optuna_for_elasticnet('Wine_quality')
+"""optuna_for_random_forest('Wine_quality', 1000)
+optuna_for_decision_tree('Wine_quality', 1000)
+optuna_for_knn('Wine_quality', 1000)
+optuna_for_lasso('Wine_quality', 1000)
+optuna_for_elasticnet('Wine_quality', 1000)"""

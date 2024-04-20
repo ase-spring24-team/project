@@ -458,4 +458,4 @@ if __name__ == '__main__':
     # time to optimize and run stats
     for dataset in datasets:
         for algo_name in ml_algos:
-            ranking_stats(dataset, algo_name, 1)
+            ranking_stats(dataset, algo_name, 20)

@@ -178,7 +178,7 @@ def create_knn_data_set(data_set):
 
     l.write_to_csv(data_set, "knn", ['N_neighbours', 'weights', 'algorithm', 'Leaf_size', 'P', 'metric', 'Error-'], all_data)
 
-def print_ranking_analysis(d,file_name=None):
+def print_ranking_analysis(d,file_name=None, algo_name=None):
     """
     Prints out the ranking analysis
     """
@@ -188,6 +188,7 @@ def print_ranking_analysis(d,file_name=None):
     todays_date = today.strftime("%B %d, %Y")
     print(f"Date : {todays_date}")  # print current date
     print(f"File : {file_name}")  # print file name
+    print(f"ML algo: {algo_name}")
     print(f"Repeats : 20")  # print the number of repetitions(num of times we run bonr15
     # when building our sampling group for example)
     print(f"Seed : {the.seed}")
@@ -209,12 +210,23 @@ def get_best_bonr(num):
     # and not some other value by accident
     return best.d2h(d)
 
-def get_best_opt(num):
+def get_best_opt(num, algo_name):
     """
     Runs optuna once and returns the best d2h value found
     """
     d = Data(the.file)
-    best = test_optuna.optuna_for_random_forest(the.file, num)
+    ['random_forest', 'ElasticNet', 'lasso', 'knn', 'decision tree']
+    if algo_name == "random_forest": 
+        opt = test_optuna.optuna_for_random_forest
+    elif algo_name == "ElasticNet": 
+        opt = test_optuna.optuna_for_elasticnet
+    elif algo_name == "lasso": 
+        opt = test_optuna.optuna_for_lasso
+    elif algo_name == "knn": 
+        opt = test_optuna.optuna_for_knn
+    elif algo_name == "decision tree": 
+        opt = test_optuna.optuna_for_decision_tree
+    best = opt(the.file, num)
     print(best)
     return Row(best).d2h(d)
 
@@ -259,13 +271,13 @@ def get_base_line_list(rows,d):
         d2h_list.append(row.d2h(d))
     return d2h_list
 
-def ranking_stats(file_name, algo_name):
+def ranking_stats(file_name, algo_name, iterations = 20):
     """
     Runs smo, rrp, optuna, and hyperband and compares them all to each other
     """
     the.file = f'../data/{file_name}/{algo_name}/{algo_name}_hyperparameters_1.csv'
     d = Data(the.file)  # just set d for easy use in print statements
-    print_ranking_analysis(d, file_name)
+    print_ranking_analysis(d, file_name, algo_name)
     all_rows = d.rows
     # Now we must sort all rows based on the distance to heaven to get our ceiling
     all_rows.sort(key=lambda x: x.d2h(d))
@@ -298,7 +310,7 @@ def ranking_stats(file_name, algo_name):
 
     stats = []  # list of lists...
     print("Calculating Best and Tiny...")
-    for i in range(20):
+    for i in range(iterations):
         # iterate our 20 times
         start_time = time.time()
         bonr9_best_list.append(get_best_bonr(9))  # calls to a function that runs data for bonr9
@@ -348,12 +360,12 @@ def ranking_stats(file_name, algo_name):
         rand358_clock_time_list.append(end_time-start_time)
 
         start_time = time.time()
-        opt9_best_list.append(get_best_opt(9))
+        opt9_best_list.append(get_best_opt(9, algo_name))
         end_time = time.time()
         opt9_clock_time_list.append(end_time-start_time)
 
         start_time = time.time()
-        opt_base_best_list.append(get_best_opt(10000 - 1))
+        opt_base_best_list.append(get_best_opt(10000 - 1, algo_name))
         end_time = time.time()
         opt_base_clock_time_list.append(end_time-start_time)
 
@@ -454,14 +466,15 @@ if __name__ == '__main__':
                     "Far":.95, "seed":31210, "Beam":10, "bins":16, "Cut":.1, "Support":2}))
     random.seed(the.seed)
     # datasets = []
-    datasets = [ 'SS-A', 'Wine_quality', 'pom3a', 'pom3c', 'dtlz2', 'dtlz3', 'dtlz4', 'dtlz5', 'dtlz6', 'SS-K']
-    ml_algos = ['random_forest']
+    datasets = ['SS-A', 'Wine_quality', 'pom3a', 'pom3c', 'dtlz2', 'dtlz3', 'dtlz4', 'dtlz5', 'dtlz6', 'SS-K']
+    datasets = ['dtlz2']
+    ml_algos = ['lasso', 'random_forest', 'ElasticNet', 'knn', 'decision tree']
 
 
     #for dataset in datasets:
         #print(f'-------------------------------------------------------------------------------------------{dataset}-----------------------------------------------------------------------------------------')
         #create_lasso_data_set(dataset)
-        # create_dt_regressor_data_set(dataset)
+        #create_dt_regressor_data_set(dataset)
         #create_random_forest_regression_data_set(dataset)
         #create_elasticnet_data_set(dataset)
         #ranking_stats(dataset)  # runs on 'dataset'
@@ -469,4 +482,4 @@ if __name__ == '__main__':
     # time to optimize and run stats
     for dataset in datasets:
         for algo_name in ml_algos:
-            ranking_stats(dataset, algo_name)
+            ranking_stats(dataset, algo_name, 1)

@@ -227,7 +227,7 @@ def get_best_opt(num, algo_name):
     elif algo_name == "decision tree": 
         opt = test_optuna.optuna_for_decision_tree
     best = opt(the.file, num)
-    print(best)
+    #print(best)
     return Row(best).d2h(d)
 
 

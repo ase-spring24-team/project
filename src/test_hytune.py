@@ -227,7 +227,6 @@ def get_best_opt(num, algo_name):
     elif algo_name == "decision tree": 
         opt = test_optuna.optuna_for_decision_tree
     best = opt(the.file, num)
-    print(best)
     return Row(best).d2h(d)
 
 
@@ -484,11 +483,8 @@ if __name__ == '__main__':
     the._set(SLOTS({"file":"../data/dtlz2/random_forest/merged_hyperparameters.csv", "__help": "", "m":2, "k":1, "p":2, "Half":256, "d":32, "D":4,
                     "Far":.95, "seed":31210, "Beam":10, "bins":16, "Cut":.1, "Support":2}))
     random.seed(the.seed)
-    # datasets = []
     datasets = ['SS-A', 'Wine_quality', 'pom3a', 'pom3c', 'dtlz2', 'dtlz3', 'dtlz4', 'dtlz5', 'dtlz6', 'SS-K']
-    #datasets = ['dtlz2']
     ml_algos = ['lasso', 'random_forest', 'ElasticNet', 'knn', 'decision tree']
-    #ml_algos = ['random_forest']
 
 
     #for dataset in datasets:
